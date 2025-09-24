@@ -10,7 +10,7 @@ interface DatabaseConfigProps {
     description: string
     status: 'active' | 'inactive' | 'maintenance'
   }
-  onSave: (config: any) => void
+  onSave: (config: { id: string; name: string; description: string; status: 'active' | 'inactive' | 'maintenance'; created_at: string; updated_at: string }) => void
   onClose: () => void
 }
 
@@ -76,6 +76,7 @@ export default function DatabaseConfig({
       onSave({
         id: databaseId,
         ...formData,
+        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
       
@@ -87,7 +88,7 @@ export default function DatabaseConfig({
     }
   }
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     // Clear error when user starts typing
     if (errors[field]) {

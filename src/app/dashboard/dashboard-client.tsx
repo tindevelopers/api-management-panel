@@ -72,7 +72,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
           }
         }))
       }
-    } catch (error) {
+    } catch {
       setApiStatus(prev => ({
         ...prev,
         blogWriter: {
@@ -125,7 +125,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
     router.refresh()
   }
 
-  const handleDatabaseSave = (config: any) => {
+  const handleDatabaseSave = (config: DatabaseInfo & { updated_at: string }) => {
     setDatabases(prev => 
       prev.map(db => 
         db.id === config.id 
@@ -206,7 +206,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id as 'databases' | 'apis' | 'analytics')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === tab.id
                     ? 'border-indigo-500 text-indigo-600'

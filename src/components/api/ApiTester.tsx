@@ -9,7 +9,12 @@ interface ApiTesterProps {
 
 interface TestResult {
   success: boolean
-  response?: any
+  response?: {
+    status: number
+    statusText: string
+    headers: Record<string, string>
+    data: unknown
+  }
   error?: string
   duration?: number
 }
@@ -93,7 +98,7 @@ export default function ApiTester({ apiUrl, apiName }: ApiTesterProps) {
             },
             body: parsedRequest.body ? JSON.stringify(parsedRequest.body) : undefined
           }
-        } catch (error) {
+        } catch {
           throw new Error('Invalid JSON in custom request')
         }
       }
@@ -124,11 +129,11 @@ export default function ApiTester({ apiUrl, apiName }: ApiTesterProps) {
         },
         duration
       })
-    } catch (error) {
+    } catch (err) {
       const duration = Date.now() - startTime
       setTestResults({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error: err instanceof Error ? err.message : 'Unknown error occurred',
         duration
       })
     } finally {
