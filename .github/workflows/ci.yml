@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, staging, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, staging, develop ]
 
 jobs:
   test:
@@ -72,7 +72,7 @@ jobs:
   deploy:
     needs: [test, security]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/develop'
     
     steps:
     - name: Checkout code
@@ -87,18 +87,31 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
+    - name: Set deployment environment
+      run: |
+        if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          echo "DEPLOY_ENV=production" >> $GITHUB_ENV
+          echo "APP_URL=https://api-management-panel.vercel.app" >> $GITHUB_ENV
+        elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+          echo "DEPLOY_ENV=staging" >> $GITHUB_ENV
+          echo "APP_URL=https://api-management-panel-staging.vercel.app" >> $GITHUB_ENV
+        elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+          echo "DEPLOY_ENV=preview" >> $GITHUB_ENV
+          echo "APP_URL=https://api-management-panel-develop.vercel.app" >> $GITHUB_ENV
+        fi
+        
     - name: Build application
       run: npm run build
       env:
         NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
         NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-        NEXT_PUBLIC_APP_URL: https://api-management-panel.vercel.app
+        NEXT_PUBLIC_APP_URL: ${{ env.APP_URL }}
         
     - name: Check Vercel Token
       run: |
         if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
           echo "⚠️ VERCEL_TOKEN secret not configured. Skipping deployment."
-          echo "✅ Application is already deployed at: https://api-management-panel.vercel.app"
+          echo "✅ Application is already deployed at: ${{ env.APP_URL }}"
           echo "📖 See DEPLOYMENT-GUIDE.md for setup instructions."
           exit 0
         fi
@@ -115,5 +128,5 @@ jobs:
       if: failure()
       run: |
         echo "⚠️ Automated deployment failed. This is expected if GitHub secrets are not configured."
-        echo "✅ Your application is already deployed at: https://api-management-panel-mx9z91szb-tindeveloper.vercel.app"
+        echo "✅ Your application is already deployed at: ${{ env.APP_URL }}"
         echo "📖 See DEPLOYMENT-GUIDE.md for setup instructions."
