@@ -1,7 +1,8 @@
-import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import DashboardClient from './dashboard-client'
 
-export default async function Home() {
+export default async function DashboardPage() {
   try {
     const supabase = await createClient()
 
@@ -9,13 +10,12 @@ export default async function Home() {
       data: { user },
     } = await supabase.auth.getUser()
 
-    if (user) {
-      redirect('/dashboard')
-    } else {
+    if (!user) {
       redirect('/login')
     }
+
+    return <DashboardClient user={user} />
   } catch {
-    // If Supabase is not configured, redirect to setup
     redirect('/setup')
   }
 }
