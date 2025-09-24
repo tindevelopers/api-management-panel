@@ -1,6 +1,22 @@
-# API Management Panel
+# 🚀 API Management Panel
 
-A modern API management panel built with Next.js 14, TypeScript, Tailwind CSS, and Supabase.
+A modern, secure API management panel built with Next.js 14, TypeScript, Tailwind CSS, and Supabase. Manage up to three different APIs with role-based access control, real-time updates, and a beautiful user interface.
+
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-Green)](https://supabase.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC)](https://tailwindcss.com/)
+
+## ✨ Features
+
+- 🔐 **Secure Authentication** - Complete login/signup system with Supabase Auth
+- 🛡️ **Protected Routes** - Middleware-based route protection
+- 👥 **Role-Based Access** - Admin, User, and Viewer roles
+- 📊 **Database Management** - Manage up to three different APIs
+- 🎨 **Modern UI** - Beautiful, responsive design with Tailwind CSS
+- ⚡ **Real-time Ready** - Supabase real-time subscriptions
+- 🔒 **Row Level Security** - Database-level security policies
+- 📱 **Mobile Responsive** - Works perfectly on all devices
 
 ## Features
 
@@ -11,7 +27,11 @@ A modern API management panel built with Next.js 14, TypeScript, Tailwind CSS, a
 - ⏳ **Real-time Updates**: Supabase real-time subscriptions (coming soon)
 - ⏳ **User Management**: Role-based access control (coming soon)
 
-## Tech Stack
+## 🎯 Live Demo
+
+🚧 **Coming Soon** - Deploy to Vercel for live demo
+
+## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 14 with App Router
 - **Language**: TypeScript
@@ -19,6 +39,10 @@ A modern API management panel built with Next.js 14, TypeScript, Tailwind CSS, a
 - **Authentication**: Supabase Auth
 - **Database**: Supabase (PostgreSQL)
 - **Deployment**: Vercel (recommended)
+
+## 📸 Screenshots
+
+🚧 **Coming Soon** - Screenshots of the application
 
 ## Getting Started
 
