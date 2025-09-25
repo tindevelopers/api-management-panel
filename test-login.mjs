@@ -5,10 +5,11 @@
  * Run this script to test the login functionality
  */
 
-const { createClient } = require('@supabase/supabase-js')
+import { createClient } from '@supabase/supabase-js'
+import dotenv from 'dotenv'
 
 // Load environment variables
-require('dotenv').config({ path: '.env.local' })
+dotenv.config({ path: '.env.local' })
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -48,7 +49,7 @@ async function createTestUser() {
   
   try {
     // Try to sign up a test user
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email: testEmail,
       password: testPassword,
     })
