@@ -70,10 +70,10 @@ export async function GET() {
       total: organizationsWithStats.length
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in admin organizations API:', error)
     
-    if (error.name === 'PermissionError') {
+    if (error?.name === 'PermissionError') {
       return NextResponse.json(
         { error: 'Insufficient permissions' },
         { status: 403 }

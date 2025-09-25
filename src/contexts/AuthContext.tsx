@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { Permission, RoleType, Organization, ROLE_HIERARCHY } from '@/types/multi-role'
@@ -76,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [getSession, supabase.auth])
 
-  const getSession = async () => {
+  const getSession = useCallback(async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (session?.user) {
@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Error getting session:', error)
       setAuthState(prev => ({ ...prev, loading: false }))
     }
-  }
+  }, [loadUserData])
 
   const loadUserData = async (user: User) => {
     try {

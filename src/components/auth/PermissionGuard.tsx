@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Permission, RoleType } from '@/types/multi-role'
 
@@ -36,7 +36,7 @@ export default function PermissionGuard({
   permissions = [],
   roles = []
 }: PermissionGuardProps) {
-  const [userPermissions, setUserPermissions] = useState<UserPermissions | null>(null)
+  const [, setUserPermissions] = useState<UserPermissions | null>(null)
   const [loading, setLoading] = useState(true)
   const [hasAccess, setHasAccess] = useState(false)
   const router = useRouter()
@@ -45,7 +45,7 @@ export default function PermissionGuard({
     checkPermissions()
   }, [permission, role, organizationId, permissions, roles, checkPermissions])
 
-  const checkPermissions = async () => {
+  const checkPermissions = useCallback(async () => {
     try {
       setLoading(true)
       
@@ -77,7 +77,7 @@ export default function PermissionGuard({
     } finally {
       setLoading(false)
     }
-  }
+  }, [permission, role, organizationId, permissions, roles, redirectTo, router])
 
   const checkAccess = (userPerms: UserPermissions): boolean => {
     // System admins have access to everything

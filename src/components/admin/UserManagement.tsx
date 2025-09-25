@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
 import { RoleType, UserRole, Organization } from '@/types/multi-role'
 import { 
@@ -280,9 +281,11 @@ export default function UserManagement({ className = '' }: UserManagementProps) 
                         <div className="flex items-center">
                           <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                             {user.avatar_url ? (
-                              <img
+                              <Image
                                 src={user.avatar_url}
                                 alt={user.full_name || user.email}
+                                width={40}
+                                height={40}
                                 className="h-10 w-10 rounded-full object-cover"
                               />
                             ) : (
