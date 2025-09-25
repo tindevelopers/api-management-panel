@@ -2,19 +2,15 @@
 
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Permission, RoleType, UserRole, Organization } from '@/types/multi-role'
+import { RoleType, UserRole, Organization } from '@/types/multi-role'
 import { 
   Users, 
   Plus, 
   Search, 
-  Filter, 
-  MoreVertical, 
   Edit, 
   Trash2, 
   Shield,
-  Building2,
-  UserCheck,
-  Clock
+  Building2
 } from 'lucide-react'
 import PermissionGuard from '@/components/auth/PermissionGuard'
 
@@ -34,7 +30,7 @@ interface UserManagementProps {
 }
 
 export default function UserManagement({ className = '' }: UserManagementProps) {
-  const { hasPermission, Permission } = useAuth()
+  const { Permission } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -143,7 +139,7 @@ export default function UserManagement({ className = '' }: UserManagementProps) 
         <div className="p-8 text-center">
           <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
-          <p className="text-gray-600">You don't have permission to manage system users.</p>
+          <p className="text-gray-600">You don&apos;t have permission to manage system users.</p>
         </div>
       }
     >

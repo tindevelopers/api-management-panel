@@ -43,7 +43,7 @@ export default function PermissionGuard({
 
   useEffect(() => {
     checkPermissions()
-  }, [permission, role, organizationId, permissions, roles])
+  }, [permission, role, organizationId, permissions, roles, checkPermissions])
 
   const checkPermissions = async () => {
     try {

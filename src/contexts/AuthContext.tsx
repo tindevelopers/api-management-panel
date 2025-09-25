@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     )
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [getSession, supabase.auth])
 
   const getSession = async () => {
     try {
@@ -136,7 +136,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       return {}
-    } catch (error) {
+    } catch {
       return { error: 'An unexpected error occurred' }
     }
   }
@@ -158,7 +158,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       return {}
-    } catch (error) {
+    } catch {
       return { error: 'An unexpected error occurred' }
     }
   }

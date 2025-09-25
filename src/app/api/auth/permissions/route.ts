@@ -7,11 +7,10 @@ import {
 } from '@/types/multi-role'
 import { 
   getUserPermissions,
-  getUserRolesInOrganization,
   isSystemAdmin 
 } from '@/lib/permissions'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const supabase = await createClient()
     
@@ -122,8 +121,7 @@ export async function POST(request: NextRequest) {
 async function checkPermission(
   userId: string,
   permission: Permission,
-  organizationId?: string,
-  resourceId?: string
+  organizationId?: string
 ): Promise<boolean> {
   try {
     const supabase = await createClient()

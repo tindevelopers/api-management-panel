@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { requireSystemAdmin } from '@/lib/permissions'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const supabase = await createClient()
     
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     await requireSystemAdmin(user.id)
 
-    const { email, password, full_name, role_type, organization_id } = await request.json()
+    const { email, full_name } = await request.json()
 
     // Create user in auth.users (this would typically be done through Supabase Auth Admin API)
     // For now, we'll just return success
