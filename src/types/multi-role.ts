@@ -66,7 +66,7 @@ export interface Organization {
   name: string
   slug: string
   description?: string
-  settings: Record<string, any>
+  settings: Record<string, unknown>
   subscription_plan: SubscriptionPlan
   max_users: number
   max_apis: number
@@ -138,8 +138,8 @@ export interface AuditLog {
   action: string
   resource_type: string
   resource_id?: string
-  old_values?: Record<string, any>
-  new_values?: Record<string, any>
+  old_values?: Record<string, unknown>
+  new_values?: Record<string, unknown>
   ip_address?: string
   user_agent?: string
   created_at: string
@@ -152,7 +152,7 @@ export interface OrganizationSettings {
   id: string
   organization_id: string
   setting_key: string
-  setting_value: Record<string, any>
+  setting_value: Record<string, unknown>
   created_at: string
   updated_at: string
 }
@@ -187,7 +187,7 @@ export interface UpdateOrganizationRequest {
   subscription_plan?: SubscriptionPlan
   max_users?: number
   max_apis?: number
-  settings?: Record<string, any>
+  settings?: Record<string, unknown>
 }
 
 export interface AssignRoleRequest {
