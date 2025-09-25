@@ -2,6 +2,7 @@
   "name": "api-management-panel",
   "version": "0.1.0",
   "private": true,
+  "description": "API Management Panel - Triggering redeployment",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
