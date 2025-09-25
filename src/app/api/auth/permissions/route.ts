@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check specific permission
-    const hasAccess = await checkPermission(user.id, permission, organizationId, resourceId)
+    const hasAccess = await checkPermission(user.id, permission, organizationId)
 
     return NextResponse.json({
       hasAccess,
