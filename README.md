@@ -1,8 +1,8 @@
 # 🚀 API Management Panel
 
-A modern, secure API management panel built with Next.js 14, TypeScript, Tailwind CSS, and Supabase. Manage up to three different APIs with role-based access control, real-time updates, and a beautiful user interface.
+A modern, secure API management panel built with Next.js 15, TypeScript, Tailwind CSS, and Supabase. Manage up to three different APIs with role-based access control, real-time updates, and a beautiful user interface.
 
-[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-Green)](https://supabase.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC)](https://tailwindcss.com/)
