@@ -153,9 +153,7 @@ export async function getUserRolesInOrganization(
       .from('user_roles')
       .select(`
         *,
-        organization:organizations(*),
-        user:auth.users(id, email),
-        assigned_by_user:auth.users!user_roles_assigned_by_fkey(id, email)
+        organization:organizations(*)
       `)
       .eq('user_id', userId)
       .eq('organization_id', organizationId)
