@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     )
 
     return () => subscription.unsubscribe()
-  }, [getSession, supabase.auth])
+  }, [getSession, supabase.auth, loadUserData])
 
   const getSession = useCallback(async () => {
     try {

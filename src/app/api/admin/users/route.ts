@@ -67,8 +67,8 @@ export async function GET() {
         return {
           id: user.id,
           email: user.email,
-          full_name: user.profiles?.full_name,
-          avatar_url: user.profiles?.avatar_url,
+          full_name: user.profiles?.[0]?.full_name,
+          avatar_url: user.profiles?.[0]?.avatar_url,
           created_at: user.created_at,
           last_sign_in_at: user.last_sign_in_at,
           roles: roles || [],
