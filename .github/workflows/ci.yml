@@ -115,6 +115,9 @@ jobs:
           echo "📖 See DEPLOYMENT-GUIDE.md for setup instructions."
           exit 0
         fi
+        echo "✅ VERCEL_TOKEN is configured"
+        echo "🔍 Deploy Environment: ${{ env.DEPLOY_ENV }}"
+        echo "🔍 App URL: ${{ env.APP_URL }}"
         
     - name: Deploy to Vercel
       uses: amondnet/vercel-action@v25
@@ -122,6 +125,7 @@ jobs:
         vercel-token: ${{ secrets.VERCEL_TOKEN }}
         vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
         vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        vercel-args: '${{ env.DEPLOY_ENV == "production" && "--prod" || "" }}'
         working-directory: ./
         
     - name: Deployment Status
