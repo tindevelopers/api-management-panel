@@ -82,10 +82,10 @@ export async function GET() {
       total: usersWithRoles.length
     })
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in admin users API:', error)
     
-    if (error.name === 'PermissionError') {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'PermissionError') {
       return NextResponse.json(
         { error: 'Insufficient permissions' },
         { status: 403 }
@@ -124,10 +124,10 @@ export async function POST(request: NextRequest) {
       user: { email, full_name }
     })
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating user:', error)
     
-    if (error.name === 'PermissionError') {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'PermissionError') {
       return NextResponse.json(
         { error: 'Insufficient permissions' },
         { status: 403 }
