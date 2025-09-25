@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [loadUserData, supabase.auth])
 
-  const loadUserData = async (user: User) => {
+  const loadUserData = useCallback(async (user: User) => {
     try {
       // Fetch user permissions and roles
       const response = await fetch('/api/auth/permissions')
@@ -122,7 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         currentOrganization: null
       })
     }
-  }
+  }, [])
 
   const signIn = async (email: string, password: string) => {
     try {

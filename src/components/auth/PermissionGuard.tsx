@@ -77,7 +77,7 @@ export default function PermissionGuard({
     } finally {
       setLoading(false)
     }
-  }, [permission, role, organizationId, permissions, roles, redirectTo, router, checkAccess])
+  }, [redirectTo, router, checkAccess])
 
   const checkAccess = useCallback((userPerms: UserPermissions): boolean => {
     // System admins have access to everything
@@ -128,7 +128,7 @@ export default function PermissionGuard({
 
     // If no specific requirements, allow access
     return true
-  }, [permission, role, organizationId, permissions, roles])
+  }, [permission, role, organizationId, permissions, roles, requireAll])
 
   if (loading) {
     return (

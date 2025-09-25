@@ -133,10 +133,10 @@ export async function POST(request: NextRequest) {
       message: 'Organization created successfully'
     })
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating organization:', error)
     
-    if (error.name === 'PermissionError') {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'PermissionError') {
       return NextResponse.json(
         { error: 'Insufficient permissions' },
         { status: 403 }
