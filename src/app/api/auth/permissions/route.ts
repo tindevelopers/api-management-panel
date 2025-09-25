@@ -3,7 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { 
   Permission, 
   RoleType, 
-  ROLE_HIERARCHY,
+  ROLE_HIERARCHY
+} from '@/types/multi-role'
+import { 
   getUserPermissions,
   getUserRolesInOrganization,
   isSystemAdmin 

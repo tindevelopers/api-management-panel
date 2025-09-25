@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
-import { Permission, RoleType, Organization } from '@/types/multi-role'
+import { Permission, RoleType, Organization, ROLE_HIERARCHY } from '@/types/multi-role'
 
 interface UserRole {
   id: string
@@ -248,5 +248,3 @@ export function useAuth() {
   return context
 }
 
-// Import ROLE_HIERARCHY from types
-import { ROLE_HIERARCHY } from '@/types/multi-role'
