@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Organization } from '@/types/multi-role'
+import { Organization, Permission } from '@/types/multi-role'
 import { Building2, ChevronDown, Plus, Users, Settings } from 'lucide-react'
 
 interface OrganizationSelectorProps {
@@ -20,8 +20,7 @@ export default function OrganizationSelector({
     organizations, 
     currentOrganization, 
     setCurrentOrganization,
-    hasPermission,
-    Permission
+    hasPermission
   } = useAuth()
   
   const [isOpen, setIsOpen] = useState(false)

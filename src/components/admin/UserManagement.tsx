@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { useAuth } from '@/contexts/AuthContext'
 import { RoleType, UserRole, Organization, Permission } from '@/types/multi-role'
 import { 
   Users, 

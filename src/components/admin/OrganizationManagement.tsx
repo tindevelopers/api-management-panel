@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
 import { Organization, SubscriptionPlan, Permission } from '@/types/multi-role'
 import { 
   Building2, 
