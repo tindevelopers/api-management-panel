@@ -54,7 +54,7 @@ export async function GET() {
     // Get user organizations
     const organizations = roles
       ?.filter(role => role.organization_id)
-      .map(role => role.organization)
+      .map(role => role.organization?.[0])
       .filter(Boolean) || []
 
     // Remove duplicates
