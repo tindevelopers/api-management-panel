@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Organization, SubscriptionPlan } from '@/types/multi-role'
+import { Organization, SubscriptionPlan, Permission } from '@/types/multi-role'
 import { 
   Building2, 
   Plus, 
@@ -33,7 +33,6 @@ interface OrganizationManagementProps {
 }
 
 export default function OrganizationManagement({ className = '' }: OrganizationManagementProps) {
-  const { Permission } = useAuth()
   const [organizations, setOrganizations] = useState<OrganizationWithStats[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
