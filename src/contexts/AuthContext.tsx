@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Error getting session:', error)
       setAuthState(prev => ({ ...prev, loading: false }))
     }
-  }, [loadUserData])
+  }, [loadUserData, supabase.auth])
 
   const loadUserData = async (user: User) => {
     try {
