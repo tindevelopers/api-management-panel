@@ -195,11 +195,13 @@ export async function getUserOrganizations(userId: string): Promise<Organization
     
     const organizations = new Map<string, Organization>()
     
-    roles?.forEach(role => {
-      if (role.organization) {
-        organizations.set(role.organization.id, role.organization)
-      }
-    })
+    if (roles && Array.isArray(roles)) {
+      roles.forEach((role: any) => {
+        if (role.organization && typeof role.organization === 'object' && 'id' in role.organization) {
+          organizations.set(role.organization.id, role.organization as Organization)
+        }
+      })
+    }
     
     return Array.from(organizations.values())
   } catch (error) {
