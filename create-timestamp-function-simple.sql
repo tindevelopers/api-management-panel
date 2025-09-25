@@ -25,3 +25,4 @@ SELECT 'All triggers should now work properly.' as message;
 SELECT 'You can now run the test again to verify 100% success.' as message;
 
 
+

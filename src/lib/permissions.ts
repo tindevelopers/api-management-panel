@@ -182,7 +182,7 @@ export async function getUserOrganizations(userId: string): Promise<Organization
     const { data: roles, error } = await supabase
       .from('user_roles')
       .select(`
-        organization:organizations(*)
+        organization:organizations!inner(*)
       `)
       .eq('user_id', userId)
       .eq('is_active', true)
@@ -196,9 +196,12 @@ export async function getUserOrganizations(userId: string): Promise<Organization
     const organizations = new Map<string, Organization>()
     
     if (roles && Array.isArray(roles)) {
-      roles.forEach((role: { organization?: Organization }) => {
-        if (role.organization && typeof role.organization === 'object' && 'id' in role.organization) {
-          organizations.set(role.organization.id, role.organization as Organization)
+      roles.forEach((role: { organization: Organization[] }) => {
+        if (role.organization && Array.isArray(role.organization) && role.organization.length > 0) {
+          const org = role.organization[0]
+          if (org && typeof org === 'object' && 'id' in org) {
+            organizations.set(org.id, org as Organization)
+          }
         }
       })
     }
