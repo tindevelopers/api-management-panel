@@ -14,8 +14,9 @@ export default async function Home() {
     } else {
       redirect('/login')
     }
-  } catch {
-    // If Supabase is not configured, redirect to setup
-    redirect('/setup')
+  } catch (error) {
+    // If Supabase is not configured, redirect to login instead of setup
+    console.error('Supabase configuration error:', error)
+    redirect('/login')
   }
 }

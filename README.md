@@ -29,7 +29,7 @@ A modern, secure API management panel built with Next.js 15, TypeScript, Tailwin
 
 ## 🎯 Live Demo
 
-🚧 **Coming Soon** - Deploy to Vercel for live demo
+🚀 **Live Now** - Deployed to Vercel with GitHub Actions CI/CD
 
 ## 🛠️ Tech Stack
 
