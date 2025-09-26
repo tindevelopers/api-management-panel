@@ -163,7 +163,7 @@ async function main() {
   console.log('1. Go to: https://api-management-panel-git-develop-tindeveloper.vercel.app/login')
   console.log(`2. Login with: ${ADMIN_EMAIL}`)
   console.log(`3. Password: ${ADMIN_PASSWORD}`)
-  console.log('4. Access admin panel at: /admin')
+  console.log('4. Access admin panel at: https://api-management-panel-git-develop-tindeveloper.vercel.app/admin')
   console.log('')
   console.log('🔐 Note: The admin panel currently grants all users system admin permissions')
   console.log('   for testing purposes. This will be updated once the database schema is applied.')
