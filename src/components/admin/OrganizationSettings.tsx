@@ -43,18 +43,18 @@ export default function OrganizationSettings({ organization, onUpdate }: Organiz
     
     // Security Settings
     security: {
-      password_policy: organization.settings?.password_policy || 'standard',
-      two_factor_required: organization.settings?.two_factor_required || false,
-      session_timeout: organization.settings?.session_timeout || 24,
-      ip_whitelist: organization.settings?.ip_whitelist || [],
+      password_policy: (organization.settings?.password_policy as string) || 'standard',
+      two_factor_required: (organization.settings?.two_factor_required as boolean) || false,
+      session_timeout: (organization.settings?.session_timeout as number) || 24,
+      ip_whitelist: (organization.settings?.ip_whitelist as string[]) || [],
     },
     
     // Notification Settings
     notifications: {
-      email_notifications: organization.settings?.email_notifications || true,
-      api_alerts: organization.settings?.api_alerts || true,
-      user_activity: organization.settings?.user_activity || false,
-      system_updates: organization.settings?.system_updates || true,
+      email_notifications: (organization.settings?.email_notifications as boolean) || true,
+      api_alerts: (organization.settings?.api_alerts as boolean) || true,
+      user_activity: (organization.settings?.user_activity as boolean) || false,
+      system_updates: (organization.settings?.system_updates as boolean) || true,
     }
   })
   
@@ -304,7 +304,7 @@ export default function OrganizationSettings({ organization, onUpdate }: Organiz
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={settings.features[feature.key as keyof typeof settings.features]}
+                      checked={settings.features[feature.key as keyof typeof settings.features] as boolean}
                       onChange={(e) => setSettings(prev => ({
                         ...prev,
                         features: {

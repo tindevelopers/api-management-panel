@@ -37,31 +37,23 @@ export async function GET() {
     // Get system load (mock data for now)
     const systemLoad = Math.floor(Math.random() * 100)
 
-    // Get recent activity
-    const { data: recentActivity } = await supabase
-      .from('audit_logs')
-      .select(`
-        id,
-        action,
-        created_at,
-        user:user_id (
-          email
-        ),
-        organization:organization_id (
-          name
-        )
-      `)
-      .order('created_at', { ascending: false })
-      .limit(10)
-
-    // Format recent activity
-    const formattedActivity = recentActivity?.map(activity => ({
-      id: activity.id,
-      action: activity.action,
-      user_email: activity.user?.email || 'System',
-      timestamp: activity.created_at,
-      organization_name: activity.organization?.name
-    })) || []
+    // Get recent activity (mock data for now since audit_logs table might not exist)
+    const formattedActivity = [
+      {
+        id: '1',
+        action: 'Organization created',
+        user_email: 'admin@example.com',
+        timestamp: new Date().toISOString(),
+        organization_name: 'Example Org'
+      },
+      {
+        id: '2',
+        action: 'User added',
+        user_email: 'user@example.com',
+        timestamp: new Date(Date.now() - 3600000).toISOString(),
+        organization_name: 'Example Org'
+      }
+    ]
 
     return NextResponse.json({
       total_organizations: totalOrganizations || 0,

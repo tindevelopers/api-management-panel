@@ -23,7 +23,13 @@ interface OrganizationUsersProps {
   onUpdate: () => void
 }
 
-interface UserWithRole extends UserRole {
+interface UserWithRole {
+  id: string
+  user_id: string
+  organization_id: string
+  role_type: RoleType
+  assigned_at: string
+  is_active: boolean
   user: {
     id: string
     email: string
