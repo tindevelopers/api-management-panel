@@ -13,9 +13,9 @@ export * from './error-handling'
 // =====================================================
 
 import { NextRequest, NextResponse } from 'next/server'
-import { corsMiddleware } from './cors'
-import { rateLimitMiddleware } from './rate-limiting'
-import { loggingMiddleware } from './logging'
+import { createCorsMiddleware } from './cors'
+import { createRateLimitMiddleware } from './rate-limiting'
+import { createRequestLoggingMiddleware } from './logging'
 import { createErrorHandlingMiddleware, buildErrorHandlingConfigForEnvironment } from './error-handling'
 
 // =====================================================
@@ -78,8 +78,9 @@ export function createApiMiddlewareStack(options: {
 
   // Add CORS middleware
   if (enableCors) {
+    const corsMiddleware = createCorsMiddleware(corsOptions)
     middlewares.push(async (request, next) => {
-      const corsResult = await corsMiddleware(request, corsOptions)
+      const corsResult = await corsMiddleware(request)
       if (corsResult) return corsResult
       return await next()
     })
@@ -87,8 +88,9 @@ export function createApiMiddlewareStack(options: {
 
   // Add rate limiting middleware
   if (enableRateLimit) {
+    const rateLimitMiddleware = createRateLimitMiddleware(rateLimitOptions)
     middlewares.push(async (request, next) => {
-      const rateLimitResult = await rateLimitMiddleware(request, rateLimitOptions)
+      const rateLimitResult = await rateLimitMiddleware(request)
       if (rateLimitResult) return rateLimitResult
       return await next()
     })
@@ -96,6 +98,7 @@ export function createApiMiddlewareStack(options: {
 
   // Add logging middleware
   if (enableLogging) {
+    const loggingMiddleware = createRequestLoggingMiddleware()
     middlewares.push(async (request, next) => {
       return await loggingMiddleware(request)
     })
@@ -145,7 +148,7 @@ export function createSecureApiMiddleware() {
     enableLogging: true,
     enableErrorHandling: true,
     corsOptions: {
-      origin: (origin) => {
+      origin: (origin: string | null) => {
         // Add your allowed origins here
         const allowedOrigins = ['https://yourdomain.com', 'https://app.yourdomain.com']
         return !origin || allowedOrigins.includes(origin)
@@ -156,10 +159,10 @@ export function createSecureApiMiddleware() {
     rateLimitOptions: {
       limit: 50,
       windowMs: 60 * 1000, // 1 minute
-      keyGenerator: (request) => {
+      keyGenerator: (request: NextRequest) => {
         // Use user ID if available, otherwise IP
         const userId = request.headers.get('x-user-id')
-        return userId || request.headers.get('x-forwarded-for') || request.ip || 'anonymous'
+        return userId || request.headers.get('x-forwarded-for') || 'anonymous'
       }
     }
   })
@@ -423,11 +426,11 @@ export const adminApiMiddleware = createApiMiddlewareStack({
   enableLogging: true,
   enableErrorHandling: true,
   corsOptions: {
-    origin: (origin) => {
-      // Restrict to admin domains only
-      const adminOrigins = ['https://admin.yourdomain.com']
-      return !origin || adminOrigins.includes(origin)
-    },
+      origin: (origin: string | null) => {
+        // Restrict to admin domains only
+        const adminOrigins = ['https://admin.yourdomain.com']
+        return !origin || adminOrigins.includes(origin)
+      },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
   },

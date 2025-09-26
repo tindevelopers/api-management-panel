@@ -4,7 +4,23 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { logger, auditLogger, performanceLogger, LogLevel, LogCategory } from '@/lib/utils/logging'
-import { extractRequestContext, createTimer } from '@/lib/utils'
+
+// Extract request context for logging
+function extractRequestContext(request: NextRequest) {
+  const requestId = request.headers.get('x-request-id') || crypto.randomUUID()
+  const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+  const userAgent = request.headers.get('user-agent') || 'unknown'
+
+  return {
+    requestId,
+    ipAddress: ipAddress.split(',')[0].trim(),
+    userAgent,
+    method: request.method,
+    url: request.url,
+    userId: undefined, // Will be populated by auth middleware
+    organizationId: undefined // Will be populated by auth middleware
+  }
+}
 
 // =====================================================
 // TYPES
@@ -178,7 +194,7 @@ export function createLoggingMiddleware(config: LoggingConfig) {
     } catch (error) {
       // Log error
       if (config.logErrors) {
-        await logError(error, request, config, context)
+        await logError(error as Error, request, config, context)
       }
 
       // End performance tracking
@@ -692,6 +708,6 @@ export function buildLoggingConfigForEnvironment(env: 'development' | 'staging' 
     case 'production':
       return loggingConfigs.production
     default:
-      return loggingConfigs.default
+      return loggingConfigs.production
   }
 }

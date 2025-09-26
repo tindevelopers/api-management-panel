@@ -2,11 +2,30 @@
 // Utils Index - Export all utility functions
 // =====================================================
 
+// Re-export existing utils
+export { cn } from '../utils'
+
 // Validation utilities
 export * from './validation'
 
-// API utilities
-export * from './api'
+// API utilities - exclude createValidationErrorResponse to avoid conflict
+export { 
+  createSuccessResponse,
+  createErrorResponse,
+  createNotFoundResponse,
+  createUnauthorizedResponse,
+  createForbiddenResponse,
+  createConflictResponse,
+  formatErrorForLogging,
+  sanitizeErrorForClient,
+  type HttpStatus,
+  type ErrorCodes,
+  type ApiResponse,
+  type CorsConfig,
+  type RateLimitConfig,
+  type RateLimitResult,
+  withErrorHandling
+} from './api'
 
 // Security utilities
 export * from './security'
@@ -16,9 +35,3 @@ export * from './formatting'
 
 // Logging utilities
 export * from './logging'
-
-// Re-export existing utils
-export { cn } from '../utils'
-
-// Re-export middleware utilities for convenience
-export * from '../middleware'

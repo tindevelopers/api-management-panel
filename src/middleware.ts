@@ -1,16 +1,27 @@
 import { updateSession } from '@/lib/supabase/middleware'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { 
-  createClient, 
-  hasPermission, 
-  getCurrentUserWithRoles,
-  Permission,
-  RoleType,
-  logApiRequest,
-  logSecurityEvent,
-  extractRequestContext
-} from '@/lib/utils'
+import { createClient } from '@/lib/supabase/server'
+import { hasPermission, getCurrentUserWithRoles } from '@/lib/permissions'
+import { Permission, RoleType } from '@/types/multi-role'
+import { logApiRequest, logSecurityEvent } from '@/lib/utils/logging'
+
+// Extract request context for logging
+function extractRequestContext(request: NextRequest) {
+  const requestId = request.headers.get('x-request-id') || crypto.randomUUID()
+  const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+  const userAgent = request.headers.get('user-agent') || 'unknown'
+
+  return {
+    requestId,
+    ipAddress: ipAddress.split(',')[0].trim(),
+    userAgent,
+    method: request.method,
+    url: request.url,
+    userId: undefined, // Will be populated by auth middleware
+    organizationId: undefined // Will be populated by auth middleware
+  }
+}
 
 // Route protection configuration with detailed permissions
 const protectedRoutes = {
@@ -279,10 +290,10 @@ async function handleProtectedRoute(
       )
 
       // Redirect to appropriate page based on user role
-      const userWithRoles = await getCurrentUserWithRoles()
-      if (userWithRoles?.roles.some(role => role.role_type === RoleType.SYSTEM_ADMIN)) {
+            const userWithRoles = await getCurrentUserWithRoles()
+            if (userWithRoles?.roles.some((role: any) => role.role_type === RoleType.SYSTEM_ADMIN)) {
         return NextResponse.redirect(new URL('/admin', request.url))
-      } else if (userWithRoles?.roles.length > 0) {
+      } else if (userWithRoles?.roles && userWithRoles.roles.length > 0) {
         return NextResponse.redirect(new URL('/dashboard', request.url))
       } else {
         return NextResponse.redirect(new URL('/setup', request.url))

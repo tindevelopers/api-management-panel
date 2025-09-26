@@ -188,7 +188,7 @@ export function createValidationErrorResponse(
   let errorDetails: Record<string, string[]> = {}
   
   if (errors instanceof ZodError) {
-    errors.errors.forEach((error) => {
+    errors.issues.forEach((error: any) => {
       const field = error.path.join('.')
       if (!errorDetails[field]) {
         errorDetails[field] = []
@@ -314,7 +314,7 @@ export function getClientIP(request: NextRequest): string {
     return realIP
   }
   
-  return request.ip || 'unknown'
+  return 'unknown'
 }
 
 /**

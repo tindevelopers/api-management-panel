@@ -11,7 +11,6 @@ import {
   createForbiddenResponse,
   createConflictResponse,
   createValidationErrorResponse,
-  handleApiError,
   extractRequestContext,
   HttpStatus,
   ErrorCodes

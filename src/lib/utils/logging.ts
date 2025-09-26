@@ -133,7 +133,7 @@ class Logger {
   /**
    * Core logging method
    */
-  private log(level: LogLevel, message: string, data?: any, category: LogCategory = LogCategory.SYSTEM): void {
+  public log(level: LogLevel, message: string, data?: any, category: LogCategory = LogCategory.SYSTEM): void {
     // Check if we should log this level
     if (!this.shouldLog(level)) {
       return
@@ -145,7 +145,7 @@ class Logger {
       level,
       category,
       message,
-      data: this.sanitizeData ? this.sanitize(data) : data,
+      data: this.sanitize ? this.sanitize(data) : data,
       ...this.extractContext()
     }
 
@@ -836,20 +836,15 @@ export function createRequestLoggingMiddleware() {
       ip: request.headers.get('x-forwarded-for') || 'unknown'
     }, LogCategory.API)
     
-    // Override response end to log completion
-    const originalEnd = response.end
-    response.end = function(chunk?: any, encoding?: any) {
-      const duration = Date.now() - startTime
-      
-      logger.info('Request completed', {
-        method,
-        path,
-        statusCode: response.statusCode,
-        duration
-      }, LogCategory.API)
-      
-      return originalEnd.call(this, chunk, encoding)
-    }
+    // Log request completion (simplified for Next.js)
+    const duration = Date.now() - startTime
+    
+    logger.info('Request completed', {
+      method,
+      path,
+      statusCode: response.status,
+      duration
+    }, LogCategory.API)
     
     next()
   }
