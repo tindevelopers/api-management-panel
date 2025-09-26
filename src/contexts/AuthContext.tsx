@@ -50,46 +50,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const supabase = createClient()
 
-  useEffect(() => {
-    // Get initial session
-    getSession()
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
-          await loadUserData(session.user)
-        } else if (event === 'SIGNED_OUT') {
-          setAuthState({
-            user: null,
-            roles: [],
-            permissions: [],
-            organizations: [],
-            isSystemAdmin: false,
-            loading: false,
-            currentOrganization: null
-          })
-        }
-      }
-    )
-
-    return () => subscription.unsubscribe()
-  }, [getSession, supabase.auth, loadUserData])
-
-  const getSession = useCallback(async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session?.user) {
-        await loadUserData(session.user)
-      } else {
-        setAuthState(prev => ({ ...prev, loading: false }))
-      }
-    } catch (error) {
-      console.error('Error getting session:', error)
-      setAuthState(prev => ({ ...prev, loading: false }))
-    }
-  }, [loadUserData, supabase.auth])
-
   const loadUserData = useCallback(async (user: User) => {
     try {
       // Fetch user permissions and roles
@@ -123,6 +83,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
     }
   }, [])
+
+  const getSession = useCallback(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) {
+        await loadUserData(session.user)
+      } else {
+        setAuthState(prev => ({ ...prev, loading: false }))
+      }
+    } catch (error) {
+      console.error('Error getting session:', error)
+      setAuthState(prev => ({ ...prev, loading: false }))
+    }
+  }, [loadUserData, supabase.auth])
+
+  useEffect(() => {
+    // Get initial session
+    getSession()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          await loadUserData(session.user)
+        } else if (event === 'SIGNED_OUT') {
+          setAuthState({
+            user: null,
+            roles: [],
+            permissions: [],
+            organizations: [],
+            isSystemAdmin: false,
+            loading: false,
+            currentOrganization: null
+          })
+        }
+      }
+    )
+
+    return () => subscription.unsubscribe()
+  }, [getSession, supabase.auth, loadUserData])
 
   const signIn = async (email: string, password: string) => {
     try {

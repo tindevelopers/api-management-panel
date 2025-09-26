@@ -41,44 +41,6 @@ export default function PermissionGuard({
   const [hasAccess, setHasAccess] = useState(false)
   const router = useRouter()
 
-  useEffect(() => {
-    checkPermissions()
-  }, [permission, role, organizationId, permissions, roles, checkPermissions])
-
-  const checkPermissions = useCallback(async () => {
-    try {
-      setLoading(true)
-      
-      // Fetch user permissions from API
-      const response = await fetch('/api/auth/permissions')
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch permissions')
-      }
-      
-      const data = await response.json()
-      setUserPermissions(data)
-      
-      // Check access
-      const access = await checkAccess(data)
-      setHasAccess(access)
-      
-      // Redirect if no access and redirectTo is specified
-      if (!access && redirectTo) {
-        router.push(redirectTo)
-      }
-      
-    } catch (error) {
-      console.error('Error checking permissions:', error)
-      setHasAccess(false)
-      if (redirectTo) {
-        router.push(redirectTo)
-      }
-    } finally {
-      setLoading(false)
-    }
-  }, [redirectTo, router, checkAccess])
-
   const checkAccess = useCallback((userPerms: UserPermissions): boolean => {
     // System admins have access to everything
     if (userPerms.isSystemAdmin) {
@@ -129,6 +91,44 @@ export default function PermissionGuard({
     // If no specific requirements, allow access
     return true
   }, [permission, role, organizationId, permissions, roles, requireAll])
+
+  const checkPermissions = useCallback(async () => {
+    try {
+      setLoading(true)
+      
+      // Fetch user permissions from API
+      const response = await fetch('/api/auth/permissions')
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch permissions')
+      }
+      
+      const data = await response.json()
+      setUserPermissions(data)
+      
+      // Check access
+      const access = checkAccess(data)
+      setHasAccess(access)
+      
+      // Redirect if no access and redirectTo is specified
+      if (!access && redirectTo) {
+        router.push(redirectTo)
+      }
+      
+    } catch (error) {
+      console.error('Error checking permissions:', error)
+      setHasAccess(false)
+      if (redirectTo) {
+        router.push(redirectTo)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }, [redirectTo, router, checkAccess])
+
+  useEffect(() => {
+    checkPermissions()
+  }, [permission, role, organizationId, permissions, roles, checkPermissions])
 
   if (loading) {
     return (
