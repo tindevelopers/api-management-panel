@@ -20,5 +20,4 @@ export * from './logging'
 // Re-export existing utils
 export { cn } from '../utils'
 
-// Re-export middleware utilities for convenience
-export * from '../middleware'
+// Note: Middleware utilities are available directly from their respective files

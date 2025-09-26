@@ -271,7 +271,7 @@ export function sanitizeString(input: string, maxLength: number = 1000): string 
 /**
  * Sanitize HTML content
  */
-export function sanitizeHTML(html: string): string {
+export function sanitizeHtmlContent(html: string): string {
   // Basic HTML sanitization - in production, use a proper library like DOMPurify
   return html
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
@@ -404,7 +404,7 @@ export function formatValidationErrors(errors: Record<string, string[]>): string
 /**
  * Create a validation error response
  */
-export function createValidationErrorResponse(errors: Record<string, string[]>) {
+export function createValidationErrorsResponse(errors: Record<string, string[]>) {
   return {
     success: false,
     error: 'Validation failed',

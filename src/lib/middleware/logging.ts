@@ -178,7 +178,7 @@ export function createLoggingMiddleware(config: LoggingConfig) {
     } catch (error) {
       // Log error
       if (config.logErrors) {
-        await logError(error, request, config, context)
+        await logError(error instanceof Error ? error : new Error(String(error)), request, config, context)
       }
 
       // End performance tracking
@@ -330,8 +330,11 @@ async function logResponse(
       organizationId: context.organizationId
     }
 
-    const logLevel = response.status >= 400 ? LogLevel.WARN : LogLevel.INFO
-    logger.log(logLevel, 'Response sent', responseData, LogCategory.API)
+    if (response.status >= 400) {
+      logger.warn('Response sent', responseData, LogCategory.API)
+    } else {
+      logger.info('Response sent', responseData, LogCategory.API)
+    }
   } catch (error) {
     logger.error('Failed to log response', { error: error instanceof Error ? error.message : 'Unknown error' }, LogCategory.API)
   }
@@ -692,6 +695,6 @@ export function buildLoggingConfigForEnvironment(env: 'development' | 'staging' 
     case 'production':
       return loggingConfigs.production
     default:
-      return loggingConfigs.default
+      return loggingConfigs.development
   }
 }

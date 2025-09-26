@@ -145,7 +145,7 @@ class Logger {
       level,
       category,
       message,
-      data: this.sanitizeData ? this.sanitize(data) : data,
+      data: this.config.sanitizeData ? this.sanitize(data) : data,
       ...this.extractContext()
     }
 
@@ -595,16 +595,25 @@ export function logAuthEvent(
   userAgent?: string,
   metadata?: Record<string, any>
 ): void {
-  const level = success ? LogLevel.INFO : LogLevel.WARN
-  
-  logger.log(level, `Auth: ${event}`, {
-    event,
-    userId,
-    success,
-    ipAddress,
-    userAgent,
-    metadata
-  }, LogCategory.AUTH)
+  if (success) {
+    logger.info(`Auth: ${event}`, {
+      event,
+      userId,
+      success,
+      ipAddress,
+      userAgent,
+      metadata
+    }, LogCategory.AUTH)
+  } else {
+    logger.warn(`Auth: ${event}`, {
+      event,
+      userId,
+      success,
+      ipAddress,
+      userAgent,
+      metadata
+    }, LogCategory.AUTH)
+  }
 }
 
 /**
@@ -618,18 +627,43 @@ export function logSecurityEvent(
   ipAddress?: string,
   metadata?: Record<string, any>
 ): void {
-  const level = severity === 'critical' ? LogLevel.FATAL :
-               severity === 'high' ? LogLevel.ERROR :
-               severity === 'medium' ? LogLevel.WARN : LogLevel.INFO
-  
-  logger.log(level, `Security: ${event}`, {
-    event,
-    severity,
-    userId,
-    organizationId,
-    ipAddress,
-    metadata
-  }, LogCategory.SECURITY)
+  if (severity === 'critical') {
+    logger.error(`Security: ${event}`, {
+      event,
+      severity,
+      userId,
+      organizationId,
+      ipAddress,
+      metadata
+    }, LogCategory.SECURITY)
+  } else if (severity === 'high') {
+    logger.error(`Security: ${event}`, {
+      event,
+      severity,
+      userId,
+      organizationId,
+      ipAddress,
+      metadata
+    }, LogCategory.SECURITY)
+  } else if (severity === 'medium') {
+    logger.warn(`Security: ${event}`, {
+      event,
+      severity,
+      userId,
+      organizationId,
+      ipAddress,
+      metadata
+    }, LogCategory.SECURITY)
+  } else {
+    logger.info(`Security: ${event}`, {
+      event,
+      severity,
+      userId,
+      organizationId,
+      ipAddress,
+      metadata
+    }, LogCategory.SECURITY)
+  }
 }
 
 /**
@@ -644,17 +678,26 @@ export function logDatabaseOperation(
   duration?: number,
   error?: Error
 ): void {
-  const level = error ? LogLevel.ERROR : LogLevel.DEBUG
-  
-  logger.log(level, `Database: ${operation} on ${table}`, {
-    operation,
-    table,
-    recordId,
-    userId,
-    organizationId,
-    duration,
-    error: error?.message
-  }, LogCategory.DATABASE)
+  if (error) {
+    logger.error(`Database: ${operation} on ${table}`, {
+      operation,
+      table,
+      recordId,
+      userId,
+      organizationId,
+      duration,
+      error: error?.message
+    }, LogCategory.DATABASE)
+  } else {
+    logger.debug(`Database: ${operation} on ${table}`, {
+      operation,
+      table,
+      recordId,
+      userId,
+      organizationId,
+      duration
+    }, LogCategory.DATABASE)
+  }
 }
 
 /**
@@ -859,7 +902,7 @@ export function createRequestLoggingMiddleware() {
  * Create error logging middleware
  */
 export function createErrorLoggingMiddleware() {
-  return (error: Error, request: Request, response: Response, next: () => void) => {
+  return (error: Error, request: any, response: any, next: () => void) => {
     logger.error('Request error', {
       error: error.message,
       stack: error.stack,
