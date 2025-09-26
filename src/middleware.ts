@@ -1,16 +1,17 @@
 import { updateSession } from '@/lib/supabase/middleware'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 import { 
-  createClient, 
   hasPermission, 
-  getCurrentUserWithRoles,
-  Permission,
-  RoleType,
+  getCurrentUserWithRoles
+} from '@/lib/permissions'
+import { Permission, RoleType } from '@/types/multi-role'
+import { 
   logApiRequest,
-  logSecurityEvent,
-  extractRequestContext
-} from '@/lib/utils'
+  logSecurityEvent
+} from '@/lib/utils/logging'
+import { extractRequestContext } from '@/lib/utils/api'
 
 // Route protection configuration with detailed permissions
 const protectedRoutes = {

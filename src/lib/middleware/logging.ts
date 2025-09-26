@@ -3,8 +3,8 @@
 // =====================================================
 
 import { NextRequest, NextResponse } from 'next/server'
-import { logger, auditLogger, performanceLogger, LogLevel, LogCategory } from '@/lib/utils/logging'
-import { extractRequestContext, createTimer } from '@/lib/utils'
+import { logger, auditLogger, performanceLogger, LogLevel, LogCategory, createTimer } from '@/lib/utils/logging'
+import { extractRequestContext } from '@/lib/utils/api'
 
 // =====================================================
 // TYPES

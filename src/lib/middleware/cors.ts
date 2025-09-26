@@ -240,7 +240,7 @@ export function createWildcardSubdomainCorsMiddleware(
         const url = new URL(origin)
         return url.hostname === baseDomain || 
                url.hostname.endsWith(`.${baseDomain}`) ||
-               url.hostname.match(/^[a-zA-Z0-9-]+\.${baseDomain.replace(/\./g, '\\.')}$/)
+               !!url.hostname.match(new RegExp(`^[a-zA-Z0-9-]+\\.${baseDomain.replace(/\./g, '\\.')}$`))
       } catch {
         return false
       }
