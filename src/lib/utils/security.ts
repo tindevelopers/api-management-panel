@@ -296,7 +296,7 @@ export function sanitizeHTML(html: string): string {
 export function sanitizeSQL(input: string): string {
   // Basic SQL injection prevention - use parameterized queries in production
   return input
-    .replace(/[';--]/g, '')
+    .replace(/[';-]/g, '')
     .replace(/union\s+select/gi, '')
     .replace(/drop\s+table/gi, '')
     .replace(/delete\s+from/gi, '')

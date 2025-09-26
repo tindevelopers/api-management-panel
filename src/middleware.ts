@@ -283,7 +283,7 @@ async function handleProtectedRoute(
       const userWithRoles = await getCurrentUserWithRoles()
       if (userWithRoles?.roles.some(role => role.role_type === RoleType.SYSTEM_ADMIN)) {
         return NextResponse.redirect(new URL('/admin', request.url))
-      } else if (userWithRoles?.roles.length > 0) {
+      } else if (userWithRoles?.roles && userWithRoles.roles.length > 0) {
         return NextResponse.redirect(new URL('/dashboard', request.url))
       } else {
         return NextResponse.redirect(new URL('/setup', request.url))

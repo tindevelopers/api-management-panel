@@ -735,7 +735,25 @@ export function logSystemEvent(
   level: LogLevel = LogLevel.INFO,
   metadata?: Record<string, any>
 ): void {
-  logger.log(level, `System: ${event}`, metadata, LogCategory.SYSTEM)
+  switch (level) {
+    case LogLevel.DEBUG:
+      logger.debug(`System: ${event}`, metadata, LogCategory.SYSTEM)
+      break
+    case LogLevel.INFO:
+      logger.info(`System: ${event}`, metadata, LogCategory.SYSTEM)
+      break
+    case LogLevel.WARN:
+      logger.warn(`System: ${event}`, metadata, LogCategory.SYSTEM)
+      break
+    case LogLevel.ERROR:
+      logger.error(`System: ${event}`, metadata, LogCategory.SYSTEM)
+      break
+    case LogLevel.FATAL:
+      logger.error(`System: ${event}`, metadata, LogCategory.SYSTEM)
+      break
+    default:
+      logger.info(`System: ${event}`, metadata, LogCategory.SYSTEM)
+  }
 }
 
 /**
@@ -879,20 +897,8 @@ export function createRequestLoggingMiddleware() {
       ip: request.headers.get('x-forwarded-for') || 'unknown'
     }, LogCategory.API)
     
-    // Override response end to log completion
-    const originalEnd = response.end
-    response.end = function(chunk?: any, encoding?: any) {
-      const duration = Date.now() - startTime
-      
-      logger.info('Request completed', {
-        method,
-        path,
-        statusCode: response.statusCode,
-        duration
-      }, LogCategory.API)
-      
-      return originalEnd.call(this, chunk, encoding)
-    }
+    // Note: Response end override not compatible with Next.js
+    // Logging will be handled by middleware instead
     
     next()
   }
