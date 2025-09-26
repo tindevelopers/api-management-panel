@@ -3,12 +3,13 @@ import { createClient } from '@/lib/supabase/server'
 import { requireSystemAdmin } from '@/lib/permissions'
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
+  const { id } = await params
   try {
     const supabase = await createClient()
     
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { data: organization, error: orgError } = await supabase
       .from('organizations')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (orgError || !organization) {
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { count: userCount } = await supabase
       .from('user_roles')
       .select('*', { count: 'exact', head: true })
-      .eq('organization_id', params.id)
+      .eq('organization_id', id)
       .eq('is_active', true)
 
     // Get organization users with their details
@@ -62,7 +63,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           last_sign_in_at
         )
       `)
-      .eq('organization_id', params.id)
+      .eq('organization_id', id)
       .eq('is_active', true)
       .order('assigned_at', { ascending: false })
 
@@ -104,6 +105,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  const { id } = await params
   try {
     const supabase = await createClient()
     
@@ -128,7 +130,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         ...updateData,
         updated_at: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -163,6 +165,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  const { id } = await params
   try {
     const supabase = await createClient()
     
@@ -185,7 +188,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         is_active: false,
         updated_at: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (orgError) {
       console.error('Error deleting organization:', orgError)

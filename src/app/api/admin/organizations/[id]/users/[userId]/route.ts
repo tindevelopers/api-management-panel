@@ -3,13 +3,14 @@ import { createClient } from '@/lib/supabase/server'
 import { requireSystemAdmin } from '@/lib/permissions'
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string
     userId: string
-  }
+  }>
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  const { id, userId } = await params
   try {
     const supabase = await createClient()
     
@@ -32,8 +33,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         is_active: false,
         updated_at: new Date().toISOString()
       })
-      .eq('user_id', params.userId)
-      .eq('organization_id', params.id)
+      .eq('user_id', userId)
+      .eq('organization_id', id)
 
     if (roleError) {
       console.error('Error removing user from organization:', roleError)

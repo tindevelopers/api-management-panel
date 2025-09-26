@@ -3,13 +3,14 @@ import { createClient } from '@/lib/supabase/server'
 import { requireSystemAdmin } from '@/lib/permissions'
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string
     userId: string
-  }
+  }>
 }
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  const { id, userId } = await params
   try {
     const supabase = await createClient()
     
@@ -34,8 +35,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         role_type,
         updated_at: new Date().toISOString()
       })
-      .eq('user_id', params.userId)
-      .eq('organization_id', params.id)
+      .eq('user_id', userId)
+      .eq('organization_id', id)
       .select()
       .single()
 

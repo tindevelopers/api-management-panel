@@ -3,12 +3,13 @@ import { createClient } from '@/lib/supabase/server'
 import { requireSystemAdmin } from '@/lib/permissions'
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
+  const { id } = await params
   try {
     const supabase = await createClient()
     
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           last_sign_in_at
         )
       `)
-      .eq('organization_id', params.id)
+      .eq('organization_id', id)
       .eq('is_active', true)
       .order('assigned_at', { ascending: false })
 

@@ -169,7 +169,7 @@ export default function OrganizationDetail({ organizationId }: OrganizationDetai
         <div className="text-center">
           <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">Organization not found</h3>
-          <p className="text-gray-600 mb-4">The organization you're looking for doesn't exist or you don't have access to it.</p>
+          <p className="text-gray-600 mb-4">The organization you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it.</p>
           <Link
             href="/admin/organizations"
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -417,7 +417,7 @@ export default function OrganizationDetail({ organizationId }: OrganizationDetai
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">Delete Organization</h3>
               <p className="text-sm text-gray-500 mb-6">
-                Are you sure you want to delete "{organization.name}"? This action cannot be undone.
+                Are you sure you want to delete &quot;{organization.name}&quot;? This action cannot be undone.
               </p>
               <div className="flex space-x-3">
                 <button
