@@ -9,9 +9,6 @@ import {
   Globe,
   Database,
   Bell,
-  Key,
-  Lock,
-  AlertTriangle,
   CheckCircle
 } from 'lucide-react'
 

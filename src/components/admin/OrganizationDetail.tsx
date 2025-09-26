@@ -1,12 +1,11 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Organization, SubscriptionPlan, UserRole, RoleType } from '@/types/multi-role'
+import { Organization, SubscriptionPlan, UserRole } from '@/types/multi-role'
 import { 
   Building2, 
   Users, 
-  Settings, 
   Globe,
   Edit,
   Trash2,
@@ -14,7 +13,6 @@ import {
   Crown,
   Star,
   Shield,
-  UserPlus,
   Activity,
   BarChart3
 } from 'lucide-react'
@@ -51,11 +49,7 @@ export default function OrganizationDetail({ organizationId }: OrganizationDetai
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const router = useRouter()
 
-  useEffect(() => {
-    fetchOrganizationDetails()
-  }, [organizationId])
-
-  const fetchOrganizationDetails = async () => {
+  const fetchOrganizationDetails = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch(`/api/admin/organizations/${organizationId}`)
@@ -71,7 +65,11 @@ export default function OrganizationDetail({ organizationId }: OrganizationDetai
     } finally {
       setLoading(false)
     }
-  }
+  }, [organizationId])
+
+  useEffect(() => {
+    fetchOrganizationDetails()
+  }, [fetchOrganizationDetails])
 
   const handleUpdateOrganization = async (updatedOrg: Partial<Organization>) => {
     try {
