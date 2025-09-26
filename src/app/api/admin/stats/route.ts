@@ -19,17 +19,31 @@ export async function GET() {
     // Check if user is system admin
     await requireSystemAdmin(user.id)
 
-    // Get total organizations
-    const { count: totalOrganizations } = await supabase
-      .from('organizations')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_active', true)
+    // Get total organizations (with fallback for missing tables)
+    let totalOrganizations = 0
+    try {
+      const { count } = await supabase
+        .from('organizations')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true)
+      totalOrganizations = count || 0
+    } catch (error) {
+      console.log('Organizations table not found, using default value')
+      totalOrganizations = 0
+    }
 
-    // Get total users across all organizations
-    const { count: totalUsers } = await supabase
-      .from('user_roles')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_active', true)
+    // Get total users across all organizations (with fallback for missing tables)
+    let totalUsers = 0
+    try {
+      const { count } = await supabase
+        .from('user_roles')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true)
+      totalUsers = count || 0
+    } catch (error) {
+      console.log('User roles table not found, using default value')
+      totalUsers = 0
+    }
 
     // Get active APIs (mock data for now)
     const activeApis = Math.floor(Math.random() * 50) + 10

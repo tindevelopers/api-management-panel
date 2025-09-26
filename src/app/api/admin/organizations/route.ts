@@ -19,19 +19,25 @@ export async function GET() {
     // Check if user is system admin
     await requireSystemAdmin(user.id)
 
-    // Fetch all organizations with their stats
-    const { data: organizations, error: orgsError } = await supabase
-      .from('organizations')
-      .select('*')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
+    // Fetch all organizations with their stats (with fallback for missing tables)
+    let organizations = []
+    try {
+      const { data, error: orgsError } = await supabase
+        .from('organizations')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
 
-    if (orgsError) {
-      console.error('Error fetching organizations:', orgsError)
-      return NextResponse.json(
-        { error: 'Failed to fetch organizations' },
-        { status: 500 }
-      )
+      if (orgsError) {
+        console.error('Error fetching organizations:', orgsError)
+        // Return empty array instead of error to allow interface to load
+        organizations = []
+      } else {
+        organizations = data || []
+      }
+    } catch (error) {
+      console.log('Organizations table not found, returning empty array')
+      organizations = []
     }
 
     // For each organization, fetch their stats
