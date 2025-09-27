@@ -15,6 +15,7 @@ import {
   Star
 } from 'lucide-react'
 import PermissionGuard from '@/components/auth/PermissionGuard'
+import OrganizationForm from './OrganizationForm'
 
 interface OrganizationStats {
   total_users: number
@@ -37,6 +38,7 @@ export default function OrganizationManagement({ className = '' }: OrganizationM
   const [searchTerm, setSearchTerm] = useState('')
   const [filterPlan, setFilterPlan] = useState<SubscriptionPlan | 'all'>('all')
   const [selectedOrgs, setSelectedOrgs] = useState<string[]>([])
+  const [showCreateForm, setShowCreateForm] = useState(false)
 
   useEffect(() => {
     fetchOrganizations()
@@ -85,6 +87,25 @@ export default function OrganizationManagement({ className = '' }: OrganizationM
       }
     } catch (error) {
       console.error(`Error ${action} organization:`, error)
+    }
+  }
+
+  const handleCreateOrganization = async (data: Partial<Organization>) => {
+    try {
+      const response = await fetch('/api/admin/organizations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+
+      if (response.ok) {
+        await fetchOrganizations()
+        setShowCreateForm(false)
+      }
+    } catch (error) {
+      console.error('Error creating organization:', error)
     }
   }
 
@@ -152,7 +173,10 @@ export default function OrganizationManagement({ className = '' }: OrganizationM
             <h1 className="text-2xl font-bold text-gray-900">Organization Management</h1>
             <p className="text-gray-600">Manage organizations and their subscriptions</p>
           </div>
-          <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <button 
+            onClick={() => setShowCreateForm(true)}
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
             <Plus className="h-4 w-4 mr-2" />
             Add Organization
           </button>
@@ -383,6 +407,18 @@ export default function OrganizationManagement({ className = '' }: OrganizationM
           )}
         </div>
       </div>
+
+      {/* Create Organization Modal */}
+      {showCreateForm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <OrganizationForm
+              onSubmit={handleCreateOrganization}
+              onCancel={() => setShowCreateForm(false)}
+            />
+          </div>
+        </div>
+      )}
     </PermissionGuard>
   )
 }
