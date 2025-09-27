@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { RoleType, UserRole, Organization, Permission, ExtendedUser } from '@/types/multi-role'
 import { authenticatedApiCall } from '@/lib/utils/api-client'
+import { debugLogger } from '@/lib/utils/debug'
 import { 
   Users, 
   Plus, 
@@ -30,6 +31,7 @@ import UserDetailModal from './UserDetailModal'
 import UserInviteModal from './UserInviteModal'
 import BulkActionModal from './BulkActionModal'
 import AdvancedFilters from './AdvancedFilters'
+import DebugPanel from './DebugPanel'
 
 interface User {
   id: string
@@ -93,6 +95,12 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
   const [bulkAction, setBulkAction] = useState<'activate' | 'deactivate' | 'delete'>('activate')
 
   useEffect(() => {
+    debugLogger.componentMount('GlobalUserManagement', {
+      filters,
+      pagination,
+      sortBy,
+      sortOrder
+    })
     fetchUsers()
     fetchOrganizations()
   }, [filters, pagination.offset, sortBy, sortOrder])
@@ -100,6 +108,13 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
   const fetchUsers = async () => {
     try {
       setLoading(true)
+      debugLogger.componentRender('GlobalUserManagement', 'Starting fetchUsers', {
+        filters,
+        pagination,
+        sortBy,
+        sortOrder
+      })
+
       const params = new URLSearchParams()
       
       // Add filters
@@ -117,16 +132,43 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
       params.append('sort_by', sortBy)
       params.append('sort_order', sortOrder)
 
-      const response = await authenticatedApiCall(`/api/admin/users?${params}`)
+      const url = `/api/admin/users?${params}`
+      debugLogger.apiRequest(url, 'GET', { action: 'fetching users' })
+
+      const response = await authenticatedApiCall(url)
       
+      debugLogger.apiResponse(url, 'GET', response.status, {
+        status: response.status,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries())
+      })
+
       if (!response.ok) {
-        throw new Error('Failed to fetch users')
+        const errorText = await response.text()
+        debugLogger.apiError(url, 'GET', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText
+        })
+        throw new Error(`Failed to fetch users: ${response.status} ${response.statusText}`)
       }
 
       const data = await response.json()
+      debugLogger.componentRender('GlobalUserManagement', 'Users fetched successfully', {
+        userCount: data.users?.length || 0,
+        pagination: data.pagination
+      })
+
       setUsers(data.users || [])
       setPagination(data.pagination || pagination)
     } catch (error) {
+      debugLogger.error('Error in fetchUsers', {
+        error,
+        filters,
+        pagination,
+        sortBy,
+        sortOrder
+      })
       console.error('Error fetching users:', error)
     } finally {
       setLoading(false)
@@ -135,12 +177,35 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
 
   const fetchOrganizations = async () => {
     try {
-      const response = await authenticatedApiCall('/api/admin/organizations')
+      debugLogger.componentRender('GlobalUserManagement', 'Starting fetchOrganizations')
+      
+      const url = '/api/admin/organizations'
+      debugLogger.apiRequest(url, 'GET', { action: 'fetching organizations' })
+
+      const response = await authenticatedApiCall(url)
+      
+      debugLogger.apiResponse(url, 'GET', response.status, {
+        status: response.status,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries())
+      })
+
       if (response.ok) {
         const data = await response.json()
+        debugLogger.componentRender('GlobalUserManagement', 'Organizations fetched successfully', {
+          organizationCount: data.organizations?.length || 0
+        })
         setOrganizations(data.organizations || [])
+      } else {
+        const errorText = await response.text()
+        debugLogger.apiError(url, 'GET', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText
+        })
       }
     } catch (error) {
+      debugLogger.error('Error in fetchOrganizations', error)
       console.error('Error fetching organizations:', error)
     }
   }
@@ -728,6 +793,9 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
           action={bulkAction}
         />
       )}
+
+      {/* Debug Panel */}
+      <DebugPanel />
     </PermissionGuard>
   )
 }
