@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 import { authenticatedApiCall } from '@/lib/utils/api-client'
@@ -48,14 +48,7 @@ export default function SystemAdminDashboard({ user, initialStats }: SystemAdmin
   const [loading, setLoading] = useState(!initialStats)
   const router = useRouter()
 
-  useEffect(() => {
-    // If no initial stats provided, fetch from API
-    if (!initialStats) {
-      fetchSystemStats()
-    }
-  }, [initialStats])
-
-  const fetchSystemStats = async () => {
+  const fetchSystemStats = useCallback(async () => {
     try {
       setLoading(true)
       const response = await authenticatedApiCall('/api/admin/stats')
@@ -71,7 +64,14 @@ export default function SystemAdminDashboard({ user, initialStats }: SystemAdmin
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    // If no initial stats provided, fetch from API
+    if (!initialStats) {
+      fetchSystemStats()
+    }
+  }, [initialStats, fetchSystemStats])
 
   const getLoadColor = (load: number) => {
     if (load < 30) return 'text-green-600'

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Organization, SubscriptionPlan, Permission } from '@/types/multi-role'
 import { authenticatedApiCall } from '@/lib/utils/api-client'
 import { 
@@ -50,16 +50,7 @@ export default function OrganizationManagement({ className = '', initialOrganiza
   const [selectedOrgs, setSelectedOrgs] = useState<string[]>([])
   const [showCreateForm, setShowCreateForm] = useState(false)
 
-  useEffect(() => {
-    // If no initial data provided, fetch from API
-    if (initialOrganizations.length === 0) {
-      fetchOrganizations()
-    } else {
-      setLoading(false)
-    }
-  }, [initialOrganizations])
-
-  const fetchOrganizations = async () => {
+  const fetchOrganizations = useCallback(async () => {
     try {
       setLoading(true)
       const response = await authenticatedApiCall('/api/admin/organizations')
@@ -75,7 +66,16 @@ export default function OrganizationManagement({ className = '', initialOrganiza
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    // If no initial data provided, fetch from API
+    if (!initialOrganizations || initialOrganizations.length === 0) {
+      fetchOrganizations()
+    } else {
+      setLoading(false)
+    }
+  }, [initialOrganizations, fetchOrganizations])
 
   const filteredOrganizations = organizations.filter(org => {
     const matchesSearch = org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
