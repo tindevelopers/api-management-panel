@@ -55,13 +55,13 @@ export async function GET(request: NextRequest) {
     
     const usersError = null
 
-    if (usersError) {
-      console.error('Error fetching users:', usersError)
-      return NextResponse.json(
-        { error: 'Failed to fetch users', details: usersError.message },
-        { status: 500 }
-      )
-    }
+        if (usersError) {
+          console.error('Error fetching users:', usersError)
+          return NextResponse.json(
+            { error: 'Failed to fetch users', details: usersError?.message || 'Unknown error' },
+            { status: 500 }
+          )
+        }
 
     console.log('Successfully fetched users:', users?.length || 0)
 
@@ -90,13 +90,13 @@ export async function GET(request: NextRequest) {
     const count = 1
     const countError = null
 
-    if (countError) {
-      console.error('Error fetching user count:', countError)
-      return NextResponse.json(
-        { error: 'Failed to fetch user count', details: countError.message },
-        { status: 500 }
-      )
-    }
+        if (countError) {
+          console.error('Error fetching user count:', countError)
+          return NextResponse.json(
+            { error: 'Failed to fetch user count', details: countError?.message || 'Unknown error' },
+            { status: 500 }
+          )
+        }
 
     console.log('Successfully fetched user count:', count)
 
