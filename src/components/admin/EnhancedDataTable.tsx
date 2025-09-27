@@ -9,7 +9,6 @@ import {
   TableRow 
 } from '@/components/ui/table'
 import { ChevronUpIcon, ChevronDownIcon, SearchIcon } from 'lucide-react'
-import Image from 'next/image'
 
 interface Column {
   key: string
@@ -44,7 +43,7 @@ export default function EnhancedDataTable({
   const [searchTerm, setSearchTerm] = useState('')
 
   const filteredAndSortedData = useMemo(() => {
-    let filtered = data.filter((item) =>
+    const filtered = data.filter((item) =>
       Object.values(item).some((value) =>
         typeof value === 'string' &&
         value.toLowerCase().includes(searchTerm.toLowerCase())

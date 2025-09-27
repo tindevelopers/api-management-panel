@@ -75,7 +75,7 @@ export default function GlobalUserManagement({
   const [showBulkAction, setShowBulkAction] = useState(false)
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
-  const [bulkAction, setBulkAction] = useState<string>('')
+  const [bulkAction, setBulkAction] = useState<'activate' | 'deactivate' | 'delete' | null>(null)
   const [pagination, setPagination] = useState<Pagination>({
     total: 0,
     page: 1,
@@ -207,7 +207,7 @@ export default function GlobalUserManagement({
     setShowInviteModal(true)
   }
 
-  const handleBulkAction = (action: string) => {
+  const handleBulkAction = (action: 'activate' | 'deactivate' | 'delete') => {
     setBulkAction(action)
     setShowBulkAction(true)
   }
@@ -414,7 +414,7 @@ export default function GlobalUserManagement({
               <AdvancedFilters
                 filters={filters}
                 organizations={organizations}
-                onFilterChange={handleFilterChange}
+                onFiltersChange={handleFilterChange}
                 onClose={() => setShowAdvancedFilters(false)}
               />
             </CardContent>
@@ -439,13 +439,11 @@ export default function GlobalUserManagement({
         {showUserDetail && selectedUser && (
           <UserDetailModal
             user={selectedUser}
-            organizations={organizations}
-            isOpen={showUserDetail}
             onClose={() => {
               setShowUserDetail(false)
               setSelectedUser(null)
             }}
-            onSave={() => {
+            onUserUpdate={() => {
               setShowUserDetail(false)
               setSelectedUser(null)
               fetchUsers()
@@ -458,20 +456,24 @@ export default function GlobalUserManagement({
             organizations={organizations}
             isOpen={showInviteModal}
             onClose={() => setShowInviteModal(false)}
-            onInvite={() => {
+            onInvite={async (email: string, roleType: RoleType, organizationId: string) => {
+              // Handle invite logic here
+              console.log('Inviting user:', { email, roleType, organizationId })
               setShowInviteModal(false)
               fetchUsers()
             }}
           />
         )}
 
-        {showBulkAction && (
+        {showBulkAction && bulkAction && (
           <BulkActionModal
             action={bulkAction}
-            selectedUsers={selectedUsers}
+            selectedCount={selectedUsers.length}
             isOpen={showBulkAction}
             onClose={() => setShowBulkAction(false)}
-            onConfirm={() => {
+            onConfirm={async (action) => {
+              // Handle bulk action logic here
+              console.log('Bulk action:', action, selectedUsers)
               setShowBulkAction(false)
               setSelectedUsers([])
               fetchUsers()
