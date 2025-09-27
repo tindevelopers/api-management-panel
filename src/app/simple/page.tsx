@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export default function SimplePage() {
   return (
     <div className="p-8">
@@ -5,14 +7,14 @@ export default function SimplePage() {
       <p>This page should work without authentication.</p>
       <div className="mt-4 space-y-2">
         <div>
-          <a href="/test" className="text-blue-600 hover:underline block">
+          <Link href="/test" className="text-blue-600 hover:underline block">
             Go to Test Page
-          </a>
+          </Link>
         </div>
         <div>
-          <a href="/admin/organizations" className="text-blue-600 hover:underline block">
+          <Link href="/admin/organizations" className="text-blue-600 hover:underline block">
             Go to Organizations (should redirect to login)
-          </a>
+          </Link>
         </div>
       </div>
     </div>
