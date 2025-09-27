@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { RoleType, UserRole, Organization, Permission } from '@/types/multi-role'
+import { RoleType, UserRole, Organization, Permission, ExtendedUser } from '@/types/multi-role'
 import { 
   Users, 
   Plus, 
@@ -51,12 +51,12 @@ interface Pagination {
 }
 
 interface Filters {
-  search?: string
-  role_type?: string
-  organization_id?: string
-  is_active?: boolean
-  created_after?: string
-  created_before?: string
+  search: string
+  roleType: string
+  organizationId: string
+  isActive: string
+  createdAfter: string
+  createdBefore: string
 }
 
 interface GlobalUserManagementProps {
@@ -64,7 +64,7 @@ interface GlobalUserManagementProps {
 }
 
 export default function GlobalUserManagement({ className = '' }: GlobalUserManagementProps) {
-  const [users, setUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<ExtendedUser[]>([])
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const [loading, setLoading] = useState(true)
   const [pagination, setPagination] = useState<Pagination>({
@@ -73,15 +73,23 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
     offset: 0,
     has_more: false
   })
-  const [filters, setFilters] = useState<Filters>({})
+  const [filters, setFilters] = useState<Filters>({
+    search: '',
+    roleType: '',
+    organizationId: '',
+    isActive: '',
+    createdAfter: '',
+    createdBefore: ''
+  })
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
-  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [selectedUser, setSelectedUser] = useState<ExtendedUser | null>(null)
   const [showUserDetail, setShowUserDetail] = useState(false)
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [showBulkModal, setShowBulkModal] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
   const [sortBy, setSortBy] = useState<'created_at' | 'email' | 'last_sign_in_at'>('created_at')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [bulkAction, setBulkAction] = useState<'activate' | 'deactivate' | 'delete'>('activate')
 
   useEffect(() => {
     fetchUsers()
@@ -154,28 +162,6 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
     }
   }
 
-  const handleBulkAction = async (action: string, data?: any) => {
-    try {
-      const response = await fetch('/api/admin/users/bulk', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userIds: selectedUsers,
-          action,
-          ...data
-        }),
-      })
-
-      if (response.ok) {
-        setSelectedUsers([])
-        await fetchUsers()
-      }
-    } catch (error) {
-      console.error(`Error bulk ${action} users:`, error)
-    }
-  }
 
   const handleFilterChange = (newFilters: Filters) => {
     setFilters(newFilters)
@@ -208,13 +194,13 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
     }
   }
 
-  const getStatusBadge = (user: User) => {
-    if (!user.is_active) {
+  const getStatusBadge = (user: ExtendedUser) => {
+    if (!(user as any).is_active) {
       return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"><X className="h-3 w-3 mr-1" />Inactive</span>
     }
     
-    if (user.last_login_at) {
-      const lastLogin = new Date(user.last_login_at)
+    if ((user as any).last_login_at) {
+      const lastLogin = new Date((user as any).last_login_at)
       const daysSinceLogin = Math.floor((Date.now() - lastLogin.getTime()) / (1000 * 60 * 60 * 24))
       
       if (daysSinceLogin < 7) {
@@ -255,14 +241,14 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
       // Convert to CSV
       const csvContent = [
         ['Email', 'Name', 'Status', 'Roles', 'Organizations', 'Created', 'Last Login'].join(','),
-        ...data.users.map((user: User) => [
+        ...data.users.map((user: ExtendedUser) => [
           user.email,
-          user.full_name || '',
-          user.is_active ? 'Active' : 'Inactive',
+          (user as any).full_name || '',
+          (user as any).is_active ? 'Active' : 'Inactive',
           user.roles.map(r => r.role_type).join(';'),
-          user.organizations.map(o => o.name).join(';'),
+          (user as any).organizations?.map((o: any) => o.name).join(';') || '',
           formatDate(user.created_at),
-          user.last_login_at ? formatDate(user.last_login_at) : 'Never'
+          (user as any).last_login_at ? formatDate((user as any).last_login_at) : 'Never'
         ].map(field => `"${field}"`).join(','))
       ].join('\n')
       
@@ -276,6 +262,58 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
       window.URL.revokeObjectURL(url)
     } catch (error) {
       console.error('Error exporting users:', error)
+    }
+  }
+
+  const handleInviteUser = async (email: string, roleType: RoleType, organizationId: string) => {
+    try {
+      const response = await fetch('/api/admin/users/invite', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          role_type: roleType,
+          organization_id: organizationId
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to invite user')
+      }
+
+      // Refresh users list
+      await fetchUsers()
+    } catch (error) {
+      console.error('Error inviting user:', error)
+      throw error
+    }
+  }
+
+  const handleBulkAction = async (action: string) => {
+    try {
+      const response = await fetch('/api/admin/users/bulk', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_ids: selectedUsers,
+          action
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to perform bulk action')
+      }
+
+      // Refresh users list and clear selection
+      await fetchUsers()
+      setSelectedUsers([])
+    } catch (error) {
+      console.error('Error performing bulk action:', error)
+      throw error
     }
   }
 
@@ -332,7 +370,7 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Active Users</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {users.filter(u => u.is_active).length}
+                  {users.filter(u => (u as any).is_active).length}
                 </p>
               </div>
             </div>
@@ -376,10 +414,10 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
             </div>
             <div className="flex gap-2">
               <select
-                value={filters.role_type || 'all'}
+                value={filters.roleType || 'all'}
                 onChange={(e) => handleFilterChange({ 
                   ...filters, 
-                  role_type: e.target.value === 'all' ? undefined : e.target.value 
+                  roleType: e.target.value === 'all' ? '' : e.target.value 
                 })}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
@@ -389,10 +427,10 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
                 <option value={RoleType.USER}>User</option>
               </select>
               <select
-                value={filters.organization_id || 'all'}
+                value={filters.organizationId || 'all'}
                 onChange={(e) => handleFilterChange({ 
                   ...filters, 
-                  organization_id: e.target.value === 'all' ? undefined : e.target.value 
+                  organizationId: e.target.value === 'all' ? '' : e.target.value 
                 })}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
@@ -418,6 +456,7 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
             <AdvancedFilters
               filters={filters}
               onFiltersChange={handleFilterChange}
+              organizations={organizations}
               onClose={() => setShowFilters(false)}
             />
           )}
@@ -531,10 +570,10 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
                       <td className="px-6 py-4">
                         <div className="flex items-center">
                           <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            {user.avatar_url ? (
+                            {(user as any).avatar_url ? (
                               <Image
-                                src={user.avatar_url}
-                                alt={user.full_name || user.email}
+                                src={(user as any).avatar_url}
+                                alt={(user as any).full_name || user.email}
                                 width={40}
                                 height={40}
                                 className="h-10 w-10 rounded-full object-cover"
@@ -545,7 +584,7 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">
-                              {user.full_name || 'No name'}
+                              {(user as any).full_name || 'No name'}
                             </div>
                             <div className="text-sm text-gray-500">{user.email}</div>
                           </div>
@@ -568,7 +607,7 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-1">
-                          {user.organizations.slice(0, 2).map((org) => (
+                          {(user as any).organizations?.slice(0, 2).map((org: any) => (
                             <span
                               key={org.id}
                               className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200"
@@ -577,15 +616,15 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
                               {org.name}
                             </span>
                           ))}
-                          {user.organizations.length > 2 && (
+                          {(user as any).organizations?.length > 2 && (
                             <span className="text-xs text-gray-500">
-                              +{user.organizations.length - 2} more
+                              +{(user as any).organizations?.length - 2} more
                             </span>
                           )}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
-                        {user.last_login_at ? formatDate(user.last_login_at) : 'Never'}
+                        {(user as any).last_login_at ? formatDate((user as any).last_login_at) : 'Never'}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
                         {formatDate(user.created_at)}
@@ -672,18 +711,20 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
 
       {showInviteModal && (
         <UserInviteModal
+          isOpen={showInviteModal}
           organizations={organizations}
           onClose={() => setShowInviteModal(false)}
-          onInviteSent={fetchUsers}
+          onInvite={handleInviteUser}
         />
       )}
 
       {showBulkModal && (
         <BulkActionModal
+          isOpen={showBulkModal}
           selectedCount={selectedUsers.length}
-          organizations={organizations}
           onClose={() => setShowBulkModal(false)}
-          onAction={handleBulkAction}
+          onConfirm={handleBulkAction}
+          action={bulkAction}
         />
       )}
     </PermissionGuard>

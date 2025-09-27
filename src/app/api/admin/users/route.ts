@@ -80,8 +80,7 @@ export async function GET(request: NextRequest) {
     // Get total count for pagination
     let countQuery = supabase
       .from('auth.users')
-      .select('*', { count: 'exact', head: true })
-      .select('profiles!inner(*)')
+      .select('*, profiles!inner(*)', { count: 'exact', head: true })
 
     if (is_active !== null && is_active !== undefined) {
       countQuery = countQuery.eq('profiles.is_active', is_active === 'true')

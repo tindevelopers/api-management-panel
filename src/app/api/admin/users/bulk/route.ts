@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { requirePermission, Permission } from '@/lib/permissions'
+import { requirePermission } from '@/lib/permissions'
+import { Permission } from '@/types/multi-role'
 import { RoleType } from '@/types/multi-role'
 
 export async function PATCH(request: NextRequest) {
@@ -80,7 +81,7 @@ export async function PATCH(request: NextRequest) {
         user_count: userIds.length,
         user_ids: userIds 
       },
-      p_ip_address: request.ip || '127.0.0.1',
+      p_ip_address: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || '127.0.0.1',
       p_user_agent: request.headers.get('user-agent') || ''
     })
 
@@ -159,7 +160,7 @@ async function bulkAssignRole(supabase: any, userIds: string[], data: any, assig
     .eq('role_type', role_type)
     .eq('is_active', true)
 
-  const existingUserIds = existingRoles?.map(role => role.user_id) || []
+  const existingUserIds = existingRoles?.map((role: any) => role.user_id) || []
   const newUserIds = userIds.filter(id => !existingUserIds.includes(id))
 
   if (newUserIds.length === 0) {
@@ -239,7 +240,7 @@ async function bulkDeleteUsers(supabase: any, userIds: string[], deletedBy: stri
     .eq('is_active', true)
     .in('role_type', [RoleType.SYSTEM_ADMIN])
 
-  const criticalUserIds = criticalRoles?.map(role => role.user_id) || []
+  const criticalUserIds = criticalRoles?.map((role: any) => role.user_id) || []
   const deletableUserIds = userIds.filter(id => !criticalUserIds.includes(id))
 
   if (deletableUserIds.length === 0) {

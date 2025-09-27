@@ -298,11 +298,7 @@ function getClientIP(request: NextRequest): string {
     return realIP
   }
   
-<<<<<<< HEAD
   return 'unknown'
-=======
-  return request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
->>>>>>> 216be5fffb85dc0646afe3f0d219efe3d4aa6e6f
 }
 
 /**

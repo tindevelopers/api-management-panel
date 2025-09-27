@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { requireSystemAdmin, requirePermission, Permission } from '@/lib/permissions'
+import { requireSystemAdmin, requirePermission } from '@/lib/permissions'
+import { Permission } from '@/types/multi-role'
 import { RoleType } from '@/types/multi-role'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -23,7 +24,7 @@ export async function GET(
     // Check if user has permission to view user details
     await requirePermission(user.id, Permission.MANAGE_SYSTEM_USERS)
 
-    const { userId } = params
+    const { userId } = await params
 
     // Fetch user details with profile, roles, and organizations
     const { data: userData, error: userDataError } = await supabase
@@ -130,7 +131,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -147,7 +148,7 @@ export async function PATCH(
 
     await requirePermission(user.id, Permission.MANAGE_SYSTEM_USERS)
 
-    const { userId } = params
+    const { userId } = await params
     const body = await request.json()
     const { action, ...updateData } = body
 
@@ -207,7 +208,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -224,7 +225,7 @@ export async function DELETE(
 
     await requirePermission(user.id, Permission.MANAGE_SYSTEM_USERS)
 
-    const { userId } = params
+    const { userId } = await params
 
     // Prevent self-deletion
     if (userId === user.id) {
@@ -282,7 +283,7 @@ export async function DELETE(
       p_resource_id: userId,
       p_old_values: {},
       p_new_values: { deleted: true },
-      p_ip_address: request.ip || '127.0.0.1',
+      p_ip_address: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || '127.0.0.1',
       p_user_agent: request.headers.get('user-agent') || ''
     })
 

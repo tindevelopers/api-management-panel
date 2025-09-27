@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { requirePermission, Permission } from '@/lib/permissions'
+import { requirePermission } from '@/lib/permissions'
+import { Permission } from '@/types/multi-role'
 import { RoleType } from '@/types/multi-role'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -207,7 +208,7 @@ export async function POST(request: NextRequest) {
         role_type,
         organization_name: organization.name
       },
-      p_ip_address: request.ip || '127.0.0.1',
+      p_ip_address: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || '127.0.0.1',
       p_user_agent: request.headers.get('user-agent') || ''
     })
 

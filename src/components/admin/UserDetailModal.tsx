@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { X, Edit, Save, User, Mail, Phone, Globe, Shield, Building2, Calendar, Activity } from 'lucide-react'
-import { User as UserType, Organization, RoleType, Permission } from '@/types/multi-role'
+import { ExtendedUser as UserType, Organization, RoleType, Permission } from '@/types/multi-role'
 import PermissionGuard from '@/components/auth/PermissionGuard'
 
 interface UserDetailModalProps {
@@ -15,7 +15,7 @@ export default function UserDetailModal({ user, onClose, onUserUpdate }: UserDet
   const [activeTab, setActiveTab] = useState<'profile' | 'roles' | 'activity'>('profile')
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
-    full_name: user.full_name || '',
+    full_name: (user as any).full_name || '',
     phone: '',
     timezone: 'UTC'
   })
@@ -115,10 +115,10 @@ export default function UserDetailModal({ user, onClose, onUserUpdate }: UserDet
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center">
             <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
-              {user.avatar_url ? (
+              {(user as any).avatar_url ? (
                 <img
-                  src={user.avatar_url}
-                  alt={user.full_name || user.email}
+                  src={(user as any).avatar_url}
+                  alt={(user as any).full_name || user.email}
                   className="h-12 w-12 rounded-full object-cover"
                 />
               ) : (
@@ -127,7 +127,7 @@ export default function UserDetailModal({ user, onClose, onUserUpdate }: UserDet
             </div>
             <div className="ml-4">
               <h2 className="text-xl font-semibold text-gray-900">
-                {user.full_name || 'No name'}
+                {(user as any).full_name || 'No name'}
               </h2>
               <p className="text-gray-600">{user.email}</p>
             </div>
@@ -213,7 +213,7 @@ export default function UserDetailModal({ user, onClose, onUserUpdate }: UserDet
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   ) : (
-                    <p className="text-gray-900">{user.full_name || 'Not provided'}</p>
+                    <p className="text-gray-900">{(user as any).full_name || 'Not provided'}</p>
                   )}
                 </div>
 
@@ -278,11 +278,11 @@ export default function UserDetailModal({ user, onClose, onUserUpdate }: UserDet
                     Account Status
                   </label>
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    user.is_active 
+                    (user as any).is_active 
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-red-100 text-red-800'
                   }`}>
-                    {user.is_active ? 'Active' : 'Inactive'}
+                    {(user as any).is_active ? 'Active' : 'Inactive'}
                   </span>
                 </div>
 
@@ -315,7 +315,7 @@ export default function UserDetailModal({ user, onClose, onUserUpdate }: UserDet
               </div>
 
               <div className="space-y-4">
-                {user.roles.map((role, index) => (
+                {user.roles.map((role: any, index: number) => (
                   <div key={index} className="border border-gray-200 rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
@@ -349,7 +349,7 @@ export default function UserDetailModal({ user, onClose, onUserUpdate }: UserDet
                       <div className="mt-2">
                         <p className="text-xs text-gray-500 mb-1">Custom Permissions:</p>
                         <div className="flex flex-wrap gap-1">
-                          {role.permissions.map((permission, permIndex) => (
+                          {role.permissions.map((permission: any, permIndex: number) => (
                             <span
                               key={permIndex}
                               className="inline-flex items-center px-2 py-1 rounded text-xs bg-gray-100 text-gray-800"
@@ -371,7 +371,7 @@ export default function UserDetailModal({ user, onClose, onUserUpdate }: UserDet
                   <div className="text-center py-8">
                     <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No roles assigned</h3>
-                    <p className="text-gray-600">This user doesn't have any roles assigned yet.</p>
+                    <p className="text-gray-600">This user doesn&apos;t have any roles assigned yet.</p>
                   </div>
                 )}
               </div>
