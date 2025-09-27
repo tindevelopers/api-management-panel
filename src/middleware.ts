@@ -126,15 +126,15 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next({ request })
     }
 
+    // Handle API routes before auth session to prevent 401 errors
+    if (pathname.startsWith('/api/')) {
+      // TEMPORARY: Skip API authentication to prevent infinite recursion
+      console.log('⚠️  TEMPORARY: Skipping API authentication for admin routes')
+      return NextResponse.next({ request })
+    }
+
     // Handle auth session for protected routes
     const response = await updateSession(request)
-
-  // Handle API routes
-  if (pathname.startsWith('/api/')) {
-    // TEMPORARY: Skip API authentication to prevent infinite recursion
-    console.log('⚠️  TEMPORARY: Skipping API authentication for admin routes')
-    return response
-  }
 
     // Handle protected routes
     if (requiresAuthentication(pathname)) {
