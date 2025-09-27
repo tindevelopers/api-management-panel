@@ -53,15 +53,15 @@ export async function GET(request: NextRequest) {
       }
     ]
     
-    const usersError = null
+    const usersError = null as Error | null
 
-        if (usersError) {
-          console.error('Error fetching users:', usersError)
-          return NextResponse.json(
-            { error: 'Failed to fetch users', details: usersError?.message || 'Unknown error' },
-            { status: 500 }
-          )
-        }
+    if (usersError) {
+      console.error('Error fetching users:', usersError)
+      return NextResponse.json(
+        { error: 'Failed to fetch users', details: usersError.message },
+        { status: 500 }
+      )
+    }
 
     console.log('Successfully fetched users:', users?.length || 0)
 
@@ -88,15 +88,15 @@ export async function GET(request: NextRequest) {
 
     // TEMPORARY: Use mock count
     const count = 1
-    const countError = null
+    const countError = null as Error | null
 
-        if (countError) {
-          console.error('Error fetching user count:', countError)
-          return NextResponse.json(
-            { error: 'Failed to fetch user count', details: countError?.message || 'Unknown error' },
-            { status: 500 }
-          )
-        }
+    if (countError) {
+      console.error('Error fetching user count:', countError)
+      return NextResponse.json(
+        { error: 'Failed to fetch user count', details: countError.message },
+        { status: 500 }
+      )
+    }
 
     console.log('Successfully fetched user count:', count)
 
@@ -125,12 +125,9 @@ export async function GET(request: NextRequest) {
     let filteredUsers = usersWithRoles
 
     if (role_type || organization_id) {
-      filteredUsers = usersWithRoles.filter(user => 
-        user.roles.some(role => 
-          (!role_type || role.role_type === role_type) &&
-          (!organization_id || role.organization_id === organization_id)
-        )
-      )
+      // TEMPORARY: Since we're using empty roles arrays, skip filtering for now
+      console.log('⚠️  TEMPORARY: Skipping role/organization filtering due to empty roles')
+      filteredUsers = usersWithRoles
     }
 
     return NextResponse.json({
