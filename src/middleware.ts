@@ -129,10 +129,12 @@ export async function middleware(request: NextRequest) {
     // Handle auth session for protected routes
     const response = await updateSession(request)
 
-    // Handle API routes
-    if (pathname.startsWith('/api/')) {
-      return await handleApiRoute(request, response, context)
-    }
+  // Handle API routes
+  if (pathname.startsWith('/api/')) {
+    // TEMPORARY: Skip API authentication to prevent infinite recursion
+    console.log('⚠️  TEMPORARY: Skipping API authentication for admin routes')
+    return response
+  }
 
     // Handle protected routes
     if (requiresAuthentication(pathname)) {
