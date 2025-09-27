@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { requireSystemAdmin } from '@/lib/permissions'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
     
@@ -19,8 +19,19 @@ export async function GET() {
     // Check if user is system admin
     await requireSystemAdmin(user.id)
 
-    // Fetch all users with their roles and organizations
-    const { data: users, error: usersError } = await supabase
+    // Parse query parameters
+    const { searchParams } = new URL(request.url)
+    const search = searchParams.get('search')
+    const role_type = searchParams.get('role_type')
+    const organization_id = searchParams.get('organization_id')
+    const is_active = searchParams.get('is_active')
+    const created_after = searchParams.get('created_after')
+    const created_before = searchParams.get('created_before')
+    const limit = parseInt(searchParams.get('limit') || '50')
+    const offset = parseInt(searchParams.get('offset') || '0')
+
+    // Build query with filters
+    let usersQuery = supabase
       .from('auth.users')
       .select(`
         id,
@@ -31,9 +42,32 @@ export async function GET() {
         profiles:profiles!inner(
           id,
           full_name,
-          avatar_url
+          avatar_url,
+          is_active,
+          last_login_at
         )
       `)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
+
+    // Apply filters
+    if (is_active !== null && is_active !== undefined) {
+      usersQuery = usersQuery.eq('profiles.is_active', is_active === 'true')
+    }
+
+    if (created_after) {
+      usersQuery = usersQuery.gte('created_at', created_after)
+    }
+
+    if (created_before) {
+      usersQuery = usersQuery.lte('created_at', created_before)
+    }
+
+    if (search) {
+      usersQuery = usersQuery.or(`email.ilike.%${search}%,profiles.full_name.ilike.%${search}%`)
+    }
+
+    const { data: users, error: usersError } = await usersQuery
 
     if (usersError) {
       console.error('Error fetching users:', usersError)
@@ -43,11 +77,35 @@ export async function GET() {
       )
     }
 
+    // Get total count for pagination
+    let countQuery = supabase
+      .from('auth.users')
+      .select('*', { count: 'exact', head: true })
+      .select('profiles!inner(*)')
+
+    if (is_active !== null && is_active !== undefined) {
+      countQuery = countQuery.eq('profiles.is_active', is_active === 'true')
+    }
+
+    if (created_after) {
+      countQuery = countQuery.gte('created_at', created_after)
+    }
+
+    if (created_before) {
+      countQuery = countQuery.lte('created_at', created_before)
+    }
+
+    if (search) {
+      countQuery = countQuery.or(`email.ilike.%${search}%,profiles.full_name.ilike.%${search}%`)
+    }
+
+    const { count } = await countQuery
+
     // For each user, fetch their roles and organizations
     const usersWithRoles = await Promise.all(
       users.map(async (user) => {
-        // Get user roles
-        const { data: roles } = await supabase
+        // Get user roles with optional filters
+        let rolesQuery = supabase
           .from('user_roles')
           .select(`
             *,
@@ -55,6 +113,16 @@ export async function GET() {
           `)
           .eq('user_id', user.id)
           .eq('is_active', true)
+
+        if (role_type) {
+          rolesQuery = rolesQuery.eq('role_type', role_type)
+        }
+
+        if (organization_id) {
+          rolesQuery = rolesQuery.eq('organization_id', organization_id)
+        }
+
+        const { data: roles } = await rolesQuery
 
         // Get unique organizations
         const organizations = roles
@@ -71,15 +139,42 @@ export async function GET() {
           avatar_url: user.profiles?.[0]?.avatar_url,
           created_at: user.created_at,
           last_sign_in_at: user.last_sign_in_at,
+          last_login_at: user.profiles?.[0]?.last_login_at,
+          is_active: user.profiles?.[0]?.is_active,
           roles: roles || [],
           organizations
         }
       })
     )
 
+    // Filter users by role or organization if specified
+    let filteredUsers = usersWithRoles
+
+    if (role_type || organization_id) {
+      filteredUsers = usersWithRoles.filter(user => 
+        user.roles.some(role => 
+          (!role_type || role.role_type === role_type) &&
+          (!organization_id || role.organization_id === organization_id)
+        )
+      )
+    }
+
     return NextResponse.json({
-      users: usersWithRoles,
-      total: usersWithRoles.length
+      users: filteredUsers,
+      pagination: {
+        total: count || 0,
+        limit,
+        offset,
+        has_more: (count || 0) > offset + limit
+      },
+      filters: {
+        search,
+        role_type,
+        organization_id,
+        is_active: is_active === 'true' ? true : is_active === 'false' ? false : undefined,
+        created_after,
+        created_before
+      }
     })
 
   } catch (error: unknown) {
