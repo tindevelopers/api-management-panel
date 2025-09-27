@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { Organization, SubscriptionPlan, Permission } from '@/types/multi-role'
 import { authenticatedApiCall } from '@/lib/utils/api-client'
-import { debugLogger } from '@/lib/utils/debug'
 import { 
   Building2, 
   Plus, 
@@ -18,7 +17,6 @@ import {
 } from 'lucide-react'
 import PermissionGuard from '@/components/auth/PermissionGuard'
 import OrganizationForm from './OrganizationForm'
-import DebugPanel from './DebugPanel'
 
 interface OrganizationStats {
   total_users: number
@@ -55,40 +53,21 @@ export default function OrganizationManagement({ className = '', initialOrganiza
   const fetchOrganizations = useCallback(async () => {
     try {
       setLoading(true)
-      debugLogger.componentRender('OrganizationManagement', 'Starting fetchOrganizations')
       
       const url = '/api/admin/organizations'
-      debugLogger.apiRequest(url, 'GET', { action: 'fetching organizations' })
-
       const response = await authenticatedApiCall(url)
-      
-      debugLogger.apiResponse(url, 'GET', response.status, {
-        status: response.status,
-        ok: response.ok,
-        headers: Object.fromEntries(response.headers.entries())
-      })
 
       if (!response.ok) {
         const errorText = await response.text()
-        debugLogger.apiError(url, 'GET', {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorText
-        })
         throw new Error(`Failed to fetch organizations: ${response.status} ${response.statusText}`)
       }
 
       const data = await response.json()
-      debugLogger.componentRender('OrganizationManagement', 'Organizations fetched successfully', {
-        organizationCount: data.organizations?.length || 0
-      })
       setOrganizations(data.organizations || [])
     } catch (error) {
-      debugLogger.error('Error in fetchOrganizations', error)
       console.error('Error fetching organizations:', error)
     } finally {
       setLoading(false)
-      debugLogger.componentRender('OrganizationManagement', 'fetchOrganizations completed')
     }
   }, [])
 
@@ -99,7 +78,7 @@ export default function OrganizationManagement({ className = '', initialOrganiza
     } else {
       setLoading(false)
     }
-  }, [initialOrganizations, fetchOrganizations])
+  }, [initialOrganizations?.length, fetchOrganizations])
 
   const filteredOrganizations = organizations.filter(org => {
     const matchesSearch = org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -459,8 +438,6 @@ export default function OrganizationManagement({ className = '', initialOrganiza
         </div>
       )}
 
-      {/* Debug Panel */}
-      <DebugPanel />
     </PermissionGuard>
   )
 }

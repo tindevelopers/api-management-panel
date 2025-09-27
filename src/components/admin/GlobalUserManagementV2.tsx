@@ -1,52 +1,39 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
-import { RoleType, UserRole, Organization, Permission, ExtendedUser } from '@/types/multi-role'
+import { Organization, Permission, ExtendedUser, RoleType } from '@/types/multi-role'
 import { authenticatedApiCall } from '@/lib/utils/api-client'
-import { debugLogger } from '@/lib/utils/debug'
-import { 
-  Users, 
-  Plus, 
-  Edit, 
-  Trash2, 
+import {
+  Users,
+  Plus,
+  Search,
+  Edit,
+  Trash2,
   Shield,
   Building2,
+  Filter,
+  Download,
+  Upload,
   UserPlus,
+  Mail,
+  Calendar,
+  MoreVertical,
+  ChevronDown,
+  X,
   CheckCircle,
   AlertCircle,
-  Clock,
-  MoreVertical
+  Clock
 } from 'lucide-react'
 import PermissionGuard from '@/components/auth/PermissionGuard'
 import UserDetailModal from './UserDetailModal'
 import UserInviteModal from './UserInviteModal'
 import BulkActionModal from './BulkActionModal'
 import AdvancedFilters from './AdvancedFilters'
-import DebugPanel from './DebugPanel'
 import EnhancedDataTable from './EnhancedDataTable'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
-interface User {
-  id: string
-  email: string
-  full_name?: string
-  avatar_url?: string
-  created_at: string
-  last_sign_in_at?: string
-  last_login_at?: string
-  is_active: boolean
-  roles: UserRole[]
-  organizations: Organization[]
-}
-
-interface Pagination {
-  total: number
-  page: number
-  limit: number
-  totalPages: number
-}
+import { Spinner } from '@/components/ui/spinner'
 
 interface Filters {
   search: string
@@ -57,150 +44,119 @@ interface Filters {
   createdBefore: string
 }
 
-interface GlobalUserManagementProps {
-  initialUsers?: ExtendedUser[]
-  initialOrganizations?: Organization[]
+interface Pagination {
+  total: number
+  limit: number
+  offset: number
 }
 
-export default function GlobalUserManagement({ 
-  initialUsers = [], 
-  initialOrganizations = [] 
-}: GlobalUserManagementProps) {
+export default function GlobalUserManagementV2({
+  initialUsers = [],
+  initialOrganizations = [],
+}: {
+  initialUsers?: ExtendedUser[]
+  initialOrganizations?: Organization[]
+}) {
   const [users, setUsers] = useState<ExtendedUser[]>(initialUsers)
   const [organizations, setOrganizations] = useState<Organization[]>(initialOrganizations)
   const [loading, setLoading] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<ExtendedUser | null>(null)
-  const [showUserDetail, setShowUserDetail] = useState(false)
+  const [showUserDetailModal, setShowUserDetailModal] = useState(false)
   const [showInviteModal, setShowInviteModal] = useState(false)
-  const [showBulkAction, setShowBulkAction] = useState(false)
+  const [showBulkActionModal, setShowBulkActionModal] = useState(false)
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([])
+  const [selectedUser, setSelectedUser] = useState<ExtendedUser | null>(null)
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([])
   const [bulkAction, setBulkAction] = useState<'activate' | 'deactivate' | 'delete' | null>(null)
-  const [pagination, setPagination] = useState<Pagination>({
-    total: 0,
-    page: 1,
-    limit: 10,
-    totalPages: 0
-  })
   const [filters, setFilters] = useState<Filters>({
     search: '',
-    roleType: '',
-    organizationId: '',
-    isActive: '',
+    roleType: 'all',
+    organizationId: 'all',
+    isActive: 'all',
     createdAfter: '',
-    createdBefore: ''
+    createdBefore: '',
   })
+  const [pagination, setPagination] = useState<Pagination>({
+    total: initialUsers.length,
+    limit: 10,
+    offset: 0,
+  })
+  const [sortBy, setSortBy] = useState<string>('created_at')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      setLoading(true)
+
+      const params = new URLSearchParams()
+      if (filters.search) params.append('search', filters.search)
+      if (filters.roleType !== 'all') params.append('role_type', filters.roleType)
+      if (filters.organizationId !== 'all') params.append('organization_id', filters.organizationId)
+      if (filters.isActive !== 'all') params.append('is_active', filters.isActive)
+      if (filters.createdAfter) params.append('created_after', filters.createdAfter)
+      if (filters.createdBefore) params.append('created_before', filters.createdBefore)
+      params.append('limit', pagination.limit.toString())
+      params.append('offset', pagination.offset.toString())
+      params.append('sort_by', sortBy)
+      params.append('sort_order', sortOrder)
+
+      const url = `/api/admin/users?${params.toString()}`
+      const response = await authenticatedApiCall(url)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to fetch users: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      setUsers(data.users || [])
+      setPagination(data.pagination || pagination)
+    } catch (error) {
+      console.error('Error fetching users:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [filters, pagination.limit, pagination.offset, sortBy, sortOrder])
+
+  const fetchOrganizations = useCallback(async () => {
+    try {
+      const url = '/api/admin/organizations'
+      const response = await authenticatedApiCall(url)
+
+      if (response.ok) {
+        const data = await response.json()
+        setOrganizations(data.organizations || [])
+      }
+    } catch (error) {
+      console.error('Error fetching organizations:', error)
+    }
+  }, [])
 
   useEffect(() => {
-    debugLogger.componentMount('GlobalUserManagementV2', {
-      filters,
-      pagination,
-      initialUsers: initialUsers.length,
-      initialOrganizations: initialOrganizations.length
-    })
-    
     if (initialUsers.length === 0) {
       fetchUsers()
     }
     if (initialOrganizations.length === 0) {
       fetchOrganizations()
     }
-  }, [])
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true)
-      debugLogger.componentRender('GlobalUserManagementV2', 'Starting fetchUsers')
-
-      const params = new URLSearchParams()
-      if (filters.search) params.append('search', filters.search)
-      if (filters.roleType) params.append('role_type', filters.roleType)
-      if (filters.organizationId) params.append('organization_id', filters.organizationId)
-      if (filters.isActive) params.append('is_active', filters.isActive)
-      if (filters.createdAfter) params.append('created_after', filters.createdAfter)
-      if (filters.createdBefore) params.append('created_before', filters.createdBefore)
-      params.append('limit', pagination.limit.toString())
-      params.append('offset', ((pagination.page - 1) * pagination.limit).toString())
-
-      const url = `/api/admin/users?${params}`
-      debugLogger.apiRequest(url, 'GET', { action: 'fetching users' })
-
-      const response = await authenticatedApiCall(url)
-      
-      debugLogger.apiResponse(url, 'GET', response.status, {
-        status: response.status,
-        ok: response.ok,
-        headers: Object.fromEntries(response.headers.entries())
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        debugLogger.apiError(url, 'GET', {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorText
-        })
-        throw new Error(`Failed to fetch users: ${response.status} ${response.statusText}`)
-      }
-
-      const data = await response.json()
-      debugLogger.componentRender('GlobalUserManagementV2', 'Users fetched successfully', {
-        userCount: data.users?.length || 0,
-        pagination: data.pagination
-      })
-
-      setUsers(data.users || [])
-      setPagination(data.pagination || pagination)
-    } catch (error) {
-      debugLogger.error('Error in fetchUsers', {
-        error,
-        filters,
-        pagination
-      })
-      console.error('Error fetching users:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchOrganizations = async () => {
-    try {
-      debugLogger.componentRender('GlobalUserManagementV2', 'Starting fetchOrganizations')
-      
-      const url = '/api/admin/organizations'
-      debugLogger.apiRequest(url, 'GET', { action: 'fetching organizations' })
-
-      const response = await authenticatedApiCall(url)
-      
-      debugLogger.apiResponse(url, 'GET', response.status, 'fetchOrganizations response', {
-        status: response.status,
-        ok: response.ok,
-        headers: Object.fromEntries(response.headers.entries())
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        debugLogger.componentRender('GlobalUserManagementV2', 'Organizations fetched successfully', {
-          organizationCount: data.organizations?.length || 0
-        })
-        setOrganizations(data.organizations || [])
-      } else {
-        const errorText = await response.text()
-        debugLogger.apiError(url, 'GET', {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorText
-        })
-      }
-    } catch (error) {
-      debugLogger.error('Error in fetchOrganizations', error)
-      console.error('Error fetching organizations:', error)
-    }
-  }
+  }, [initialUsers.length, initialOrganizations.length, fetchUsers, fetchOrganizations])
 
   const handleUserClick = (user: ExtendedUser) => {
     setSelectedUser(user)
-    setShowUserDetail(true)
+    setShowUserDetailModal(true)
+  }
+
+  const handleSelectUser = (userId: string, isSelected: boolean) => {
+    setSelectedUserIds(prev =>
+      isSelected ? [...prev, userId] : prev.filter(id => id !== userId)
+    )
+  }
+
+  const handleSelectAllUsers = (isSelected: boolean) => {
+    if (isSelected) {
+      setSelectedUserIds(users.map(user => user.id))
+    } else {
+      setSelectedUserIds([])
+    }
   }
 
   const handleInviteUser = () => {
@@ -209,160 +165,146 @@ export default function GlobalUserManagement({
 
   const handleBulkAction = (action: 'activate' | 'deactivate' | 'delete') => {
     setBulkAction(action)
-    setShowBulkAction(true)
+    setShowBulkActionModal(true)
   }
 
   const handleFilterChange = (newFilters: Partial<Filters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }))
-    setPagination(prev => ({ ...prev, page: 1 }))
+    setPagination(prev => ({ ...prev, offset: 0 })) // Reset offset on filter change
   }
 
-  const handlePageChange = (page: number) => {
-    setPagination(prev => ({ ...prev, page }))
+  const handlePageChange = (newPage: number) => {
+    setPagination(prev => ({ ...prev, offset: (newPage - 1) * prev.limit }))
   }
 
-  const handleItemsPerPageChange = (limit: number) => {
-    setPagination(prev => ({ ...prev, limit, page: 1 }))
+  const handleItemsPerPageChange = (newLimit: number) => {
+    setPagination(prev => ({ ...prev, limit: newLimit, offset: 0 }))
   }
 
-  // Define table columns
   const columns = [
+    {
+      key: 'select',
+      label: 'Select',
+      sortable: false,
+      render: (user: ExtendedUser) => (
+        <input
+          type="checkbox"
+          className="form-checkbox h-4 w-4 text-brand-600"
+          checked={selectedUserIds.includes(user.id)}
+          onChange={(e) => handleSelectUser(user.id, e.target.checked)}
+        />
+      ),
+    },
     {
       key: 'user',
       label: 'User',
       sortable: true,
-      render: (value: any, row: ExtendedUser) => (
+      render: (user: ExtendedUser) => (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 overflow-hidden rounded-full">
-            <Image
-              width={40}
-              height={40}
-              src={(row as any).avatar_url || '/placeholder.svg'}
-              alt="user"
-              className="w-full h-full object-cover"
-            />
-          </div>
+          <Image
+            src={(user as any).avatar_url || '/images/default-avatar.png'}
+            alt={(user as any).full_name || user.email}
+            width={32}
+            height={32}
+            className="h-8 w-8 rounded-full object-cover"
+          />
           <div>
-            <span className="block font-medium text-gray-800 text-sm dark:text-white/90">
-              {(row as any).full_name || 'N/A'}
-            </span>
-            <span className="block text-xs text-gray-500 dark:text-gray-400">
-              {row.email}
-            </span>
+            <p className="font-medium text-gray-800 dark:text-white">
+              {(user as any).full_name || 'N/A'}
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {user.email}
+            </p>
           </div>
         </div>
-      )
+      ),
     },
     {
       key: 'roles',
       label: 'Roles',
       sortable: false,
-      render: (value: any, row: ExtendedUser) => (
+      render: (user: ExtendedUser) => (
         <div className="flex flex-wrap gap-1">
-          {row.roles?.slice(0, 2).map((role: any, index: number) => (
+          {(user as any).roles?.map((role: any, index: number) => (
             <span
               key={index}
-              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                role.role_type === RoleType.SYSTEM_ADMIN
+                  ? 'bg-purple-100 text-purple-800'
+                  : role.role_type === RoleType.ORG_ADMIN
+                  ? 'bg-blue-100 text-blue-800'
+                  : 'bg-green-100 text-green-800'
+              }`}
             >
               {role.role_type}
+              {role.organizations && role.organizations.length > 0 && (
+                <span className="ml-1">({role.organizations[0].name})</span>
+              )}
             </span>
           ))}
-          {row.roles && row.roles.length > 2 && (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-              +{row.roles.length - 2}
-            </span>
-          )}
         </div>
-      )
-    },
-    {
-      key: 'organizations',
-      label: 'Organizations',
-      sortable: false,
-      render: (value: any, row: ExtendedUser) => (
-        <div className="flex flex-wrap gap-1">
-          {(row as any).organizations?.slice(0, 1).map((org: any, index: number) => (
-            <span
-              key={index}
-              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-            >
-              {org.name}
-            </span>
-          ))}
-          {(row as any).organizations && (row as any).organizations.length > 1 && (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-              +{(row as any).organizations.length - 1}
-            </span>
-          )}
-        </div>
-      )
+      ),
     },
     {
       key: 'status',
       label: 'Status',
       sortable: true,
-      render: (value: any, row: ExtendedUser) => (
-        <div className="flex items-center gap-2">
-          {(row as any).is_active ? (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-              <CheckCircle className="w-3 h-3 mr-1" />
-              Active
-            </span>
-          ) : (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              Inactive
-            </span>
-          )}
-        </div>
-      )
+      render: (user: ExtendedUser) => (
+        <span
+          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+            (user as any).is_active
+              ? 'bg-green-100 text-green-800'
+              : 'bg-red-100 text-red-800'
+          }`}
+        >
+          {(user as any).is_active ? 'Active' : 'Inactive'}
+        </span>
+      ),
     },
     {
-      key: 'last_login',
+      key: 'last_login_at',
       label: 'Last Login',
       sortable: true,
-      render: (value: any, row: ExtendedUser) => (
-        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-          <Clock className="w-4 h-4" />
-          {(row as any).last_login_at ? 
-            new Date((row as any).last_login_at).toLocaleDateString() : 
-            'Never'
-          }
-        </div>
-      )
+      render: (user: ExtendedUser) => (
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          {(user as any).last_login_at ? new Date((user as any).last_login_at).toLocaleString() : 'Never'}
+        </span>
+      ),
+    },
+    {
+      key: 'created_at',
+      label: 'Created At',
+      sortable: true,
+      render: (user: ExtendedUser) => (
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          {new Date(user.created_at).toLocaleString()}
+        </span>
+      ),
     },
     {
       key: 'actions',
       label: 'Actions',
-      sortable: false,
-      render: (value: any, row: ExtendedUser) => (
-        <div className="flex items-center gap-2">
+      render: (user: ExtendedUser) => (
+        <div className="flex items-center space-x-2">
           <Button
-            size="sm"
             variant="ghost"
-            onClick={() => handleUserClick(row)}
-            className="h-8 w-8 p-0"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleUserClick(user)
+            }}
+            className="text-gray-600 hover:text-brand-500 dark:text-gray-400 dark:hover:text-brand-400"
           >
             <Edit className="h-4 w-4" />
           </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => {
-              // Handle delete
-              console.log('Delete user:', row.id)
-            }}
-            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          {/* More actions can be added here */}
         </div>
-      )
-    }
+      ),
+    },
   ]
 
   return (
-    <PermissionGuard 
+    <PermissionGuard
       permission={Permission.MANAGE_SYSTEM_USERS}
       fallback={
         <div className="p-8 text-center">
@@ -372,43 +314,55 @@ export default function GlobalUserManagement({
         </div>
       }
     >
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">User Management</h1>
-            <p className="text-gray-600 dark:text-gray-400">Manage system users and their permissions</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            >
-              <Building2 className="h-4 w-4 mr-2" />
-              Filters
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => handleBulkAction('activate')}
-              disabled={selectedUsers.length === 0}
-            >
-              <Users className="h-4 w-4 mr-2" />
-              Bulk Actions
-            </Button>
+      <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
+            <Users className="h-8 w-8 mr-3 text-brand-600" />
+            Global User Management
+          </h1>
+          <div className="flex space-x-3">
             <Button
               onClick={handleInviteUser}
+              className="bg-brand-600 hover:bg-brand-700 text-white flex items-center"
             >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Add User
+              <UserPlus className="h-5 w-5 mr-2" />
+              Invite User
             </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowAdvancedFilters(true)}
+              className="flex items-center"
+            >
+              <Filter className="h-5 w-5 mr-2" />
+              Advanced Filters
+            </Button>
+            {selectedUserIds.length > 0 && (
+              <div className="relative">
+                <Button
+                  variant="outline"
+                  className="flex items-center"
+                  onClick={() => { /* Toggle dropdown for bulk actions */ }}
+                >
+                  Bulk Actions ({selectedUserIds.length}) <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+                {/* Dropdown content for bulk actions */}
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10">
+                  <Button variant="ghost" className="w-full justify-start" onClick={() => handleBulkAction('activate')}>Activate</Button>
+                  <Button variant="ghost" className="w-full justify-start" onClick={() => handleBulkAction('deactivate')}>Deactivate</Button>
+                  <Button variant="ghost" className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700" onClick={() => handleBulkAction('delete')}>Delete</Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Advanced Filters */}
         {showAdvancedFilters && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Advanced Filters</CardTitle>
+          <Card className="mb-6">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">Advanced Filters</CardTitle>
+              <Button variant="ghost" size="sm" onClick={() => setShowAdvancedFilters(false)}>
+                <X className="h-4 w-4" />
+              </Button>
             </CardHeader>
             <CardContent>
               <AdvancedFilters
@@ -421,7 +375,6 @@ export default function GlobalUserManagement({
           </Card>
         )}
 
-        {/* Data Table */}
         <Card>
           <CardContent className="p-0">
             <EnhancedDataTable
@@ -436,15 +389,15 @@ export default function GlobalUserManagement({
         </Card>
 
         {/* Modals */}
-        {showUserDetail && selectedUser && (
+        {showUserDetailModal && selectedUser && (
           <UserDetailModal
             user={selectedUser}
             onClose={() => {
-              setShowUserDetail(false)
+              setShowUserDetailModal(false)
               setSelectedUser(null)
             }}
             onUserUpdate={() => {
-              setShowUserDetail(false)
+              setShowUserDetailModal(false)
               setSelectedUser(null)
               fetchUsers()
             }}
@@ -465,24 +418,21 @@ export default function GlobalUserManagement({
           />
         )}
 
-        {showBulkAction && bulkAction && (
+        {showBulkActionModal && bulkAction && (
           <BulkActionModal
             action={bulkAction}
-            selectedCount={selectedUsers.length}
-            isOpen={showBulkAction}
-            onClose={() => setShowBulkAction(false)}
+            selectedCount={selectedUserIds.length}
+            isOpen={showBulkActionModal}
+            onClose={() => setShowBulkActionModal(false)}
             onConfirm={async (action) => {
               // Handle bulk action logic here
-              console.log('Bulk action:', action, selectedUsers)
-              setShowBulkAction(false)
-              setSelectedUsers([])
+              console.log('Bulk action:', action, selectedUserIds)
+              setShowBulkActionModal(false)
+              setSelectedUserIds([])
               fetchUsers()
             }}
           />
         )}
-
-        {/* Debug Panel */}
-        <DebugPanel />
       </div>
     </PermissionGuard>
   )
