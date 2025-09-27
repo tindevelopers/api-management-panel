@@ -17,9 +17,11 @@ export default function TestOrgPage() {
               name: 'Test Organization',
               slug: 'test-org',
               description: 'A test organization',
+              settings: {},
               subscription_plan: SubscriptionPlan.FREE,
               max_users: 10,
               max_apis: 5,
+              is_active: true,
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
             }
