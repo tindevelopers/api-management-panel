@@ -2,6 +2,7 @@
 
 import React from 'react'
 import OrganizationManagement from '@/components/admin/OrganizationManagement'
+import { SubscriptionPlan } from '@/types/multi-role'
 
 export default function TestOrgPage() {
   return (
@@ -16,7 +17,7 @@ export default function TestOrgPage() {
               name: 'Test Organization',
               slug: 'test-org',
               description: 'A test organization',
-              subscription_plan: 'free',
+              subscription_plan: SubscriptionPlan.FREE,
               max_users: 10,
               max_apis: 5,
               created_at: new Date().toISOString(),
