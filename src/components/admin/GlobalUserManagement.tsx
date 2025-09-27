@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { RoleType, UserRole, Organization, Permission, ExtendedUser } from '@/types/multi-role'
+import { authenticatedApiCall } from '@/lib/utils/api-client'
 import { 
   Users, 
   Plus, 
@@ -116,7 +117,7 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
       params.append('sort_by', sortBy)
       params.append('sort_order', sortOrder)
 
-      const response = await fetch(`/api/admin/users?${params}`)
+      const response = await authenticatedApiCall(`/api/admin/users?${params}`)
       
       if (!response.ok) {
         throw new Error('Failed to fetch users')
@@ -134,7 +135,7 @@ export default function GlobalUserManagement({ className = '' }: GlobalUserManag
 
   const fetchOrganizations = async () => {
     try {
-      const response = await fetch('/api/admin/organizations')
+      const response = await authenticatedApiCall('/api/admin/organizations')
       if (response.ok) {
         const data = await response.json()
         setOrganizations(data.organizations || [])

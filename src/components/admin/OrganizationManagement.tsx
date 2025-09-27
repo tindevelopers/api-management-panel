@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { Organization, SubscriptionPlan, Permission } from '@/types/multi-role'
+import { authenticatedApiCall } from '@/lib/utils/api-client'
 import { 
   Building2, 
   Plus, 
@@ -47,7 +48,7 @@ export default function OrganizationManagement({ className = '' }: OrganizationM
   const fetchOrganizations = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/admin/organizations')
+      const response = await authenticatedApiCall('/api/admin/organizations')
       
       if (!response.ok) {
         throw new Error('Failed to fetch organizations')

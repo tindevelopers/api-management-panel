@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
+import { authenticatedApiCall } from '@/lib/utils/api-client'
 import { 
   Building2, 
   Users, 
@@ -53,7 +54,7 @@ export default function SystemAdminDashboard({ user }: SystemAdminDashboardProps
   const fetchSystemStats = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/admin/stats')
+      const response = await authenticatedApiCall('/api/admin/stats')
       
       if (!response.ok) {
         throw new Error('Failed to fetch system stats')
