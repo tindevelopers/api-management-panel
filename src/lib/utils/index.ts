@@ -35,3 +35,11 @@ export * from './formatting'
 
 // Logging utilities
 export * from './logging'
+<<<<<<< HEAD
+=======
+
+// Re-export existing utils
+export { cn } from '../utils'
+
+// Note: Middleware utilities are available directly from their respective files
+>>>>>>> 216be5fffb85dc0646afe3f0d219efe3d4aa6e6f

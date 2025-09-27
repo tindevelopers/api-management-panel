@@ -293,16 +293,16 @@ export function sanitizeHTML(html: string): string {
 /**
  * Sanitize SQL input
  */
-// export function sanitizeSQL(input: string): string {
-//   // Basic SQL injection prevention - use parameterized queries in production
-//   return input
-//     .replace(/[';--]/g, '')
-//     .replace(/union\s+select/gi, '')
-//     .replace(/drop\s+table/gi, '')
-//     .replace(/delete\s+from/gi, '')
-//     .replace(/insert\s+into/gi, '')
-//     .replace(/update\s+set/gi, '')
-// // }
+export function sanitizeSQL(input: string): string {
+  // Basic SQL injection prevention - use parameterized queries in production
+  return input
+    .replace(/[';-]/g, '')
+    .replace(/union\s+select/gi, '')
+    .replace(/drop\s+table/gi, '')
+    .replace(/delete\s+from/gi, '')
+    .replace(/insert\s+into/gi, '')
+    .replace(/update\s+set/gi, '')
+}
 
 /**
  * Sanitize file path

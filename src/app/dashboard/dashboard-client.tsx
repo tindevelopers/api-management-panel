@@ -52,7 +52,8 @@ export default function DashboardClient({ user }: DashboardClientProps) {
 
   const checkAPIStatus = async () => {
     try {
-      const response = await fetch('https://api-ai-blog-writer-613248238610.us-east1.run.app/health')
+      // Use a proxy endpoint to avoid CORS issues
+      const response = await fetch('/api/health-check')
       if (response.ok) {
         setApiStatus(prev => ({
           ...prev,
