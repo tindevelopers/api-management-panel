@@ -20,6 +20,7 @@ import Link from 'next/link'
 
 interface SystemAdminDashboardProps {
   user: User
+  initialStats?: SystemStats
 }
 
 interface SystemStats {
@@ -36,20 +37,23 @@ interface SystemStats {
   }>
 }
 
-export default function SystemAdminDashboard({ user }: SystemAdminDashboardProps) {
-  const [stats, setStats] = useState<SystemStats>({
+export default function SystemAdminDashboard({ user, initialStats }: SystemAdminDashboardProps) {
+  const [stats, setStats] = useState<SystemStats>(initialStats || {
     total_organizations: 0,
     total_users: 0,
     active_apis: 0,
     system_load: 0,
     recent_activity: []
   })
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!initialStats)
   const router = useRouter()
 
   useEffect(() => {
-    fetchSystemStats()
-  }, [])
+    // If no initial stats provided, fetch from API
+    if (!initialStats) {
+      fetchSystemStats()
+    }
+  }, [initialStats])
 
   const fetchSystemStats = async () => {
     try {

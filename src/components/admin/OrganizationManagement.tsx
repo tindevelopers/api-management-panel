@@ -31,19 +31,33 @@ interface OrganizationWithStats extends Organization {
 
 interface OrganizationManagementProps {
   className?: string
+  initialOrganizations?: Organization[]
 }
 
-export default function OrganizationManagement({ className = '' }: OrganizationManagementProps) {
-  const [organizations, setOrganizations] = useState<OrganizationWithStats[]>([])
-  const [loading, setLoading] = useState(true)
+export default function OrganizationManagement({ className = '', initialOrganizations = [] }: OrganizationManagementProps) {
+  const [organizations, setOrganizations] = useState<OrganizationWithStats[]>(initialOrganizations.map(org => ({
+    ...org,
+    stats: {
+      total_users: 0,
+      active_apis: 0,
+      storage_used: 0,
+      last_activity: new Date().toISOString()
+    }
+  })))
+  const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterPlan, setFilterPlan] = useState<SubscriptionPlan | 'all'>('all')
   const [selectedOrgs, setSelectedOrgs] = useState<string[]>([])
   const [showCreateForm, setShowCreateForm] = useState(false)
 
   useEffect(() => {
-    fetchOrganizations()
-  }, [])
+    // If no initial data provided, fetch from API
+    if (initialOrganizations.length === 0) {
+      fetchOrganizations()
+    } else {
+      setLoading(false)
+    }
+  }, [initialOrganizations])
 
   const fetchOrganizations = async () => {
     try {
