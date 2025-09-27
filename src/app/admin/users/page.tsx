@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 import { requireSystemAdmin } from '@/lib/permissions'
 import GlobalUserManagementV2 from '@/components/admin/GlobalUserManagementV2'
 
+// Force dynamic SSR to avoid any static generation attempts
+export const dynamic = 'force-dynamic'
+
 export default async function UsersPage() {
   try {
     const supabase = await createClient()

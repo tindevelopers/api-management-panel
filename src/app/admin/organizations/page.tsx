@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 import { requireSystemAdmin } from '@/lib/permissions'
 import OrganizationManagement from '@/components/admin/OrganizationManagement'
 
+// Force dynamic SSR to avoid any static generation attempts
+export const dynamic = 'force-dynamic'
+
 export default async function OrganizationsPage() {
   try {
     const supabase = await createClient()

@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 import { requireSystemAdmin } from '@/lib/permissions'
 import SystemAdminDashboard from '@/components/admin/SystemAdminDashboard'
 
+// Force dynamic SSR to avoid any static generation attempts
+export const dynamic = 'force-dynamic'
+
 export default async function AdminPage() {
   try {
     const supabase = await createClient()
