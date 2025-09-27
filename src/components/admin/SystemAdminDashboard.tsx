@@ -71,7 +71,7 @@ export default function SystemAdminDashboard({ user, initialStats }: SystemAdmin
     if (!initialStats) {
       fetchSystemStats()
     }
-  }, [initialStats, fetchSystemStats])
+  }, [initialStats]) // Removed fetchSystemStats from dependencies
 
   const getLoadColor = (load: number) => {
     if (load < 30) return 'text-green-600'

@@ -35,29 +35,25 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
 
-    // Build query with filters
+    // Build query with filters - query profiles table instead of auth.users
     let usersQuery = supabase
-      .from('auth.users')
+      .from('profiles')
       .select(`
         id,
-        email,
+        full_name,
+        avatar_url,
+        is_active,
+        last_login_at,
         created_at,
-        last_sign_in_at,
-        raw_user_meta_data,
-        profiles:profiles!inner(
-          id,
-          full_name,
-          avatar_url,
-          is_active,
-          last_login_at
-        )
+        updated_at,
+        user_id
       `)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
 
     // Apply filters
     if (is_active !== null && is_active !== undefined) {
-      usersQuery = usersQuery.eq('profiles.is_active', is_active === 'true')
+      usersQuery = usersQuery.eq('is_active', is_active === 'true')
     }
 
     if (created_after) {
@@ -69,7 +65,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      usersQuery = usersQuery.or(`email.ilike.%${search}%,profiles.full_name.ilike.%${search}%`)
+      usersQuery = usersQuery.ilike('full_name', `%${search}%`)
     }
 
     const { data: users, error: usersError } = await usersQuery
@@ -84,11 +80,11 @@ export async function GET(request: NextRequest) {
 
     // Get total count for pagination
     let countQuery = supabase
-      .from('auth.users')
-      .select('*, profiles!inner(*)', { count: 'exact', head: true })
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
 
     if (is_active !== null && is_active !== undefined) {
-      countQuery = countQuery.eq('profiles.is_active', is_active === 'true')
+      countQuery = countQuery.eq('is_active', is_active === 'true')
     }
 
     if (created_after) {
@@ -100,7 +96,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      countQuery = countQuery.or(`email.ilike.%${search}%,profiles.full_name.ilike.%${search}%`)
+      countQuery = countQuery.ilike('full_name', `%${search}%`)
     }
 
     const { count } = await countQuery
@@ -115,7 +111,7 @@ export async function GET(request: NextRequest) {
             *,
             organization:organizations(*)
           `)
-          .eq('user_id', user.id)
+          .eq('user_id', user.user_id)
           .eq('is_active', true)
 
         if (role_type) {
@@ -137,14 +133,14 @@ export async function GET(request: NextRequest) {
           ) || []
 
         return {
-          id: user.id,
-          email: user.email,
-          full_name: user.profiles?.[0]?.full_name,
-          avatar_url: user.profiles?.[0]?.avatar_url,
+          id: user.user_id,
+          email: '', // We don't have email in profiles table
+          full_name: user.full_name,
+          avatar_url: user.avatar_url,
           created_at: user.created_at,
-          last_sign_in_at: user.last_sign_in_at,
-          last_login_at: user.profiles?.[0]?.last_login_at,
-          is_active: user.profiles?.[0]?.is_active,
+          last_sign_in_at: null, // We don't have this in profiles table
+          last_login_at: user.last_login_at,
+          is_active: user.is_active,
           roles: roles || [],
           organizations
         }

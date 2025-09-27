@@ -78,7 +78,7 @@ export default function OrganizationManagement({ className = '', initialOrganiza
     } else {
       setLoading(false)
     }
-  }, [initialOrganizations?.length, fetchOrganizations])
+  }, [initialOrganizations?.length]) // Removed fetchOrganizations from dependencies
 
   const filteredOrganizations = organizations.filter(org => {
     const matchesSearch = org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

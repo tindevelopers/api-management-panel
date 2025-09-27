@@ -138,7 +138,7 @@ export default function GlobalUserManagementV2({
     if (initialOrganizations.length === 0) {
       fetchOrganizations()
     }
-  }, [initialUsers.length, initialOrganizations.length, fetchUsers, fetchOrganizations])
+  }, [initialUsers.length, initialOrganizations.length]) // Removed fetch functions from dependencies
 
   const handleUserClick = (user: ExtendedUser) => {
     setSelectedUser(user)
