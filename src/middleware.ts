@@ -94,6 +94,9 @@ const publicRoutes = [
   '/signup',
   '/auth/callback',
   '/setup',
+  '/test',
+  '/simple',
+  '/test-org',
   '/api/auth',
   '/api/health',
   '/_next',
@@ -118,13 +121,13 @@ export async function middleware(request: NextRequest) {
   const context = extractRequestContext(request)
 
   try {
-    // Handle auth session first
-    const response = await updateSession(request)
-    
-    // Allow static files and public routes
+    // Allow static files and public routes first (before auth session)
     if (isPublicRoute(pathname) || isStaticFile(pathname)) {
-      return response
+      return NextResponse.next({ request })
     }
+
+    // Handle auth session for protected routes
+    const response = await updateSession(request)
 
     // Handle API routes
     if (pathname.startsWith('/api/')) {

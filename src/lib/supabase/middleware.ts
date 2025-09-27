@@ -6,7 +6,11 @@ export async function updateSession(request: NextRequest) {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    // If environment variables are missing, redirect to login
+    // If environment variables are missing, allow public routes but redirect protected routes to login
+    const publicRoutes = ['/', '/login', '/signup', '/auth/callback', '/setup', '/test', '/simple', '/test-org']
+    if (publicRoutes.some(route => request.nextUrl.pathname.startsWith(route))) {
+      return NextResponse.next({ request })
+    }
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
