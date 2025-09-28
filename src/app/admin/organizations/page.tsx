@@ -1,73 +1,204 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { requireSystemAdmin } from '@/lib/permissions'
-import OrganizationManagement from '@/components/admin/OrganizationManagement'
-import DebugOverlay from '@/components/admin/DebugOverlay'
-import { SubscriptionPlan } from '@/types/multi-role'
+import { Suspense } from 'react'
 
-// Force dynamic SSR to avoid any static generation attempts
+// Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
-export default async function OrganizationsPage() {
-  try {
-    // TEMPORARY: Skip authentication to prevent infinite recursion
-    console.log('⚠️  TEMPORARY: Skipping authentication for organizations page')
-    
-    // const supabase = await createClient()
-    // const {
-    //   data: { user },
-    // } = await supabase.auth.getUser()
-    // if (!user) {
-    //   redirect('/login')
-    // }
+interface Organization {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  subscription_plan: string
+  max_users: number
+  max_apis: number
+  created_at: string
+  updated_at: string
+  is_active: boolean
+  user_count?: number
+  api_count?: number
+}
 
-    // Temporarily allow all authenticated users to access admin panel
-    // TODO: Replace with proper permission check once database is set up
-    // await requireSystemAdmin(user.id)
-
-    // Use mock data for now to prevent infinite recursion
-    const organizations = [
-      {
-        id: '1',
-        name: 'Demo Organization',
-        slug: 'demo-org',
-        description: 'A demo organization for testing',
-        subscription_plan: SubscriptionPlan.FREE,
-        max_users: 10,
-        max_apis: 5,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        settings: {},
-        is_active: true
-      }
-    ]
-
-    return <>
-      <OrganizationManagement initialOrganizations={organizations} />
-      <DebugOverlay />
-    </>
-  } catch (error) {
-    console.error('Error in organizations page:', error)
-    // Use mock data even on error to prevent infinite recursion
-    const organizations = [
-      {
-        id: '1',
-        name: 'Demo Organization',
-        slug: 'demo-org',
-        description: 'A demo organization for testing',
-        subscription_plan: SubscriptionPlan.FREE,
-        max_users: 10,
-        max_apis: 5,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        settings: {},
-        is_active: true
-      }
-    ]
-
-    return <>
-      <OrganizationManagement initialOrganizations={organizations} />
-      <DebugOverlay />
-    </>
+async function OrganizationsList() {
+  const supabase = await createClient()
+  
+  // Get authenticated user
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  
+  if (userError || !user) {
+    redirect('/login')
   }
+
+  // Check if user has admin permissions
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || profile.role !== 'system_admin') {
+    redirect('/dashboard')
+  }
+
+  // Fetch organizations
+  const { data: organizations, error } = await supabase
+    .from('organizations')
+    .select(`
+      id,
+      name,
+      slug,
+      description,
+      subscription_plan,
+      max_users,
+      max_apis,
+      created_at,
+      updated_at,
+      is_active
+    `)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching organizations:', error)
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <h3 className="text-red-800 font-medium">Error Loading Organizations</h3>
+          <p className="text-red-600 text-sm mt-1">
+            Unable to load organizations. Please check your database connection.
+          </p>
+          <p className="text-red-500 text-xs mt-2 font-mono">
+            {error.message}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Organizations</h1>
+        <p className="text-gray-600 mt-1">Manage all organizations in the system</p>
+      </div>
+
+      {!organizations || organizations.length === 0 ? (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+          <div className="text-gray-400 text-4xl mb-4">🏢</div>
+          <h3 className="text-gray-900 font-medium mb-2">No Organizations Found</h3>
+          <p className="text-gray-600 text-sm">
+            There are no organizations in the system yet.
+          </p>
+        </div>
+      ) : (
+        <div className="bg-white shadow rounded-lg overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Organization
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Plan
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Limits
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Created
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {organizations.map((org: Organization) => (
+                <tr key={org.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {org.name}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {org.slug}
+                      </div>
+                      {org.description && (
+                        <div className="text-xs text-gray-400 mt-1">
+                          {org.description}
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      org.subscription_plan === 'enterprise' 
+                        ? 'bg-purple-100 text-purple-800'
+                        : org.subscription_plan === 'pro'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {org.subscription_plan}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div>Users: {org.max_users}</div>
+                    <div>APIs: {org.max_apis}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(org.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <a
+                      href={`/admin/organizations/${org.id}`}
+                      className="text-indigo-600 hover:text-indigo-900 mr-4"
+                    >
+                      View
+                    </a>
+                    <button
+                      type="button"
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function LoadingState() {
+  return (
+    <div className="p-6">
+      <div className="mb-6">
+        <div className="h-8 bg-gray-200 rounded w-48 mb-2 animate-pulse"></div>
+        <div className="h-4 bg-gray-200 rounded w-64 animate-pulse"></div>
+      </div>
+      <div className="bg-white shadow rounded-lg p-6">
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex space-x-4">
+              <div className="h-4 bg-gray-200 rounded flex-1 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function OrganizationsPage() {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <OrganizationsList />
+    </Suspense>
+  )
 }
