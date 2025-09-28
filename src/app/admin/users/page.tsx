@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { requireSystemAdmin } from '@/lib/permissions'
 import GlobalUserManagementV2 from '@/components/admin/GlobalUserManagementV2'
 import DebugOverlay from '@/components/admin/DebugOverlay'
+import { SubscriptionPlan } from '@/types/multi-role'
 
 // Force dynamic SSR to avoid any static generation attempts
 export const dynamic = 'force-dynamic'
@@ -32,7 +33,12 @@ export default async function UsersPage() {
         is_active: true,
         is_system_admin: true,
         created_at: new Date().toISOString(),
-        last_login_at: new Date().toISOString()
+        last_login_at: new Date().toISOString(),
+        roles: [],
+        permissions: [],
+        app_metadata: {},
+        user_metadata: {},
+        aud: 'authenticated'
       }
     ]
     
@@ -41,7 +47,14 @@ export default async function UsersPage() {
         id: '1',
         name: 'Demo Organization',
         slug: 'demo-org',
-        description: 'A demo organization for testing'
+        description: 'A demo organization for testing',
+        subscription_plan: SubscriptionPlan.FREE,
+        max_users: 10,
+        max_apis: 5,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        settings: {},
+        is_active: true
       }
     ]
 
@@ -60,7 +73,12 @@ export default async function UsersPage() {
         is_active: true,
         is_system_admin: true,
         created_at: new Date().toISOString(),
-        last_login_at: new Date().toISOString()
+        last_login_at: new Date().toISOString(),
+        roles: [],
+        permissions: [],
+        app_metadata: {},
+        user_metadata: {},
+        aud: 'authenticated'
       }
     ]
     
@@ -69,7 +87,14 @@ export default async function UsersPage() {
         id: '1',
         name: 'Demo Organization',
         slug: 'demo-org',
-        description: 'A demo organization for testing'
+        description: 'A demo organization for testing',
+        subscription_plan: SubscriptionPlan.FREE,
+        max_users: 10,
+        max_apis: 5,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        settings: {},
+        is_active: true
       }
     ]
 
