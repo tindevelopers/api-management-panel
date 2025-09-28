@@ -49,12 +49,20 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/signup') &&
-    !request.nextUrl.pathname.startsWith('/auth')
-  ) {
+  // Debug logging
+  console.log('🔍 Middleware Debug:', {
+    pathname: request.nextUrl.pathname,
+    hasUser: !!user,
+    userId: user?.id,
+    cookies: request.cookies.getAll().map(c => c.name)
+  })
+
+  // Only redirect to login if there's no user and it's not a public route
+  const publicRoutes = ['/', '/login', '/signup', '/auth', '/setup', '/test', '/simple', '/test-org']
+  const isPublicRoute = publicRoutes.some(route => request.nextUrl.pathname.startsWith(route))
+  
+  if (!user && !isPublicRoute) {
+    console.log('🚫 No user found, redirecting to login')
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
     url.pathname = '/login'

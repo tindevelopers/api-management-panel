@@ -148,6 +148,9 @@ export async function middleware(request: NextRequest) {
       return await handleProtectedRoute(request, response, pathname, context)
     }
 
+    // For non-protected routes, just return the response
+    return response
+
     // Log request completion
     const duration = Date.now() - startTime
     logApiRequest(
