@@ -29,13 +29,22 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
+          console.log('🍪 Setting cookies:', cookiesToSet.map(c => ({ name: c.name, value: c.value?.substring(0, 20) + '...' })))
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
+          cookiesToSet.forEach(({ name, value, options }) => {
+            // Ensure cookies are set with proper options
+            const cookieOptions = {
+              ...options,
+              path: '/',
+              secure: process.env.NODE_ENV === 'production',
+              httpOnly: true,
+              sameSite: 'lax' as const
+            }
+            supabaseResponse.cookies.set(name, value, cookieOptions)
+          })
         },
       },
     }
