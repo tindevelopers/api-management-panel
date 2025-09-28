@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 
@@ -28,7 +28,7 @@ interface ApiEndpoint {
   lastCheck: string
 }
 
-export default function ApiSettings({ user }: ApiSettingsProps) {
+export default function ApiSettings({ user: _user }: ApiSettingsProps) {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [showNewKeyForm, setShowNewKeyForm] = useState(false)
@@ -77,7 +77,7 @@ export default function ApiSettings({ user }: ApiSettingsProps) {
     },
   ])
 
-  const supabase = createClient()
+  // const supabase = createClient() // Commented out as it's not currently used
 
   const availablePermissions = [
     { id: 'read', label: 'Read Access', description: 'View data and configurations' },
@@ -145,11 +145,11 @@ export default function ApiSettings({ user }: ApiSettingsProps) {
     }
   }
 
-  // Update a single endpoint's rate limit
-  const handleUpdateEndpointRateLimit = (endpointId: string, rateLimit: number) => {
-    setApiEndpoints(prev => prev.map(ep => ep.id === endpointId ? { ...ep, rateLimit } : ep))
-    setMessage({ type: 'success', text: 'Endpoint rate limit updated.' })
-  }
+  // Update a single endpoint's rate limit (currently unused but kept for future functionality)
+  // const handleUpdateEndpointRateLimit = (endpointId: string, rateLimit: number) => {
+  //   setApiEndpoints(prev => prev.map(ep => ep.id === endpointId ? { ...ep, rateLimit } : ep))
+  //   setMessage({ type: 'success', text: 'Endpoint rate limit updated.' })
+  // }
 
   // Rate limits for global configuration (local temporary state)
   const [rateLimits, setRateLimits] = useState({

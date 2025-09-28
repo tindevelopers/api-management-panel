@@ -33,7 +33,7 @@ interface NotificationPreferences {
   }
 }
 
-export default function NotificationSettings({ user }: NotificationSettingsProps) {
+export default function NotificationSettings({ user: _user }: NotificationSettingsProps) {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [preferences, setPreferences] = useState<NotificationPreferences>({
@@ -278,7 +278,7 @@ export default function NotificationSettings({ user }: NotificationSettingsProps
               </div>
             </div>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              During quiet hours, you'll only receive critical security alerts
+              During quiet hours, you&apos;ll only receive critical security alerts
             </p>
           </div>
         </div>
@@ -286,6 +286,7 @@ export default function NotificationSettings({ user }: NotificationSettingsProps
         {/* Save Button */}
         <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-700">
           <button
+            type="button"
             onClick={handleSave}
             disabled={loading}
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"

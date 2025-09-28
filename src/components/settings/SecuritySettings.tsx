@@ -22,7 +22,7 @@ interface Session {
   current: boolean
 }
 
-export default function SecuritySettings({ user }: SecuritySettingsProps) {
+export default function SecuritySettings({ user: _user }: SecuritySettingsProps) {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [passwordData, setPasswordData] = useState<PasswordData>({
@@ -112,7 +112,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
     }
   }
 
-  const handleRevokeSession = async (sessionId: string) => {
+  const handleRevokeSession = async (_sessionId: string) => {
     // In real implementation, revoke the session
     setMessage({ type: 'success', text: 'Session revoked successfully!' })
   }
@@ -181,6 +181,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
             </div>
             <div className="md:col-span-2">
               <button
+                type="button"
                 onClick={handlePasswordUpdate}
                 disabled={loading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -206,6 +207,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
               </p>
             </div>
             <button
+              type="button"
               onClick={handleToggle2FA}
               disabled={loading}
               className={`px-4 py-2 rounded-md font-medium transition-colors ${
@@ -245,6 +247,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
                     className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                   />
                   <button
+                    type="button"
                     onClick={async () => {
                       if (loading) return;
                       const input = (document.getElementById('twofa-code-input') as HTMLInputElement | null);
@@ -310,6 +313,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
                 </div>
                 {!session.current && (
                   <button
+                    type="button"
                     onClick={() => handleRevokeSession(session.id)}
                     className="px-3 py-1 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
                   >
@@ -321,6 +325,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
           </div>
           <div className="mt-4">
             <button
+              type="button"
               onClick={async () => {
                 if (loading) return;
                 const confirmed = window.confirm('Sign out of all other sessions? This will revoke access from other devices.');
@@ -357,6 +362,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
               Once you delete your account, there is no going back. Please be certain.
             </p>
             <button
+              type="button"
               onClick={async () => {
                 if (loading) return;
                 const confirmed = window.confirm('Are you sure you want to delete your account? This action is irreversible.');

@@ -135,6 +135,7 @@ export default function ProfileSettings({ user }: ProfileSettingsProps) {
           </div>
           <div>
             <button
+              type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={loading}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -245,6 +246,7 @@ export default function ProfileSettings({ user }: ProfileSettingsProps) {
         {/* Save Button */}
         <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-700">
           <button
+            type="button"
             onClick={handleSave}
             disabled={loading}
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
