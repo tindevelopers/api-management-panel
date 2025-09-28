@@ -74,11 +74,11 @@ export default function OrganizationManagement({ className = '', initialOrganiza
   useEffect(() => {
     // If no initial data provided, fetch from API
     if (!initialOrganizations || initialOrganizations.length === 0) {
-      fetchOrganizations()
+      fetchOrganizations().catch(() => setLoading(false))
     } else {
       setLoading(false)
     }
-  }, [initialOrganizations?.length]) // Removed fetchOrganizations from dependencies
+  }, [initialOrganizations?.length])
 
   const filteredOrganizations = organizations.filter(org => {
     const matchesSearch = org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

@@ -133,12 +133,12 @@ export default function GlobalUserManagementV2({
 
   useEffect(() => {
     if (initialUsers.length === 0) {
-      fetchUsers()
+      fetchUsers().catch(() => {})
     }
     if (initialOrganizations.length === 0) {
-      fetchOrganizations()
+      fetchOrganizations().catch(() => {})
     }
-  }, [initialUsers.length, initialOrganizations.length]) // Removed fetch functions from dependencies
+  }, [initialUsers.length, initialOrganizations.length])
 
   const handleUserClick = (user: ExtendedUser) => {
     setSelectedUser(user)

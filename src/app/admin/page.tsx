@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { requireSystemAdmin } from '@/lib/permissions'
 import SystemAdminDashboard from '@/components/admin/SystemAdminDashboard'
+import DebugOverlay from '@/components/admin/DebugOverlay'
 
 // Force dynamic SSR to avoid any static generation attempts
 export const dynamic = 'force-dynamic'
@@ -97,20 +98,26 @@ export default async function AdminPage() {
       }
     }
 
-    return <SystemAdminDashboard user={user} initialStats={systemStats} />
+    return <>
+      <SystemAdminDashboard user={user} initialStats={systemStats} />
+      <DebugOverlay />
+    </>
   } catch (error) {
     console.error('Error in admin page:', error)
     // Temporarily allow access even on error (temporary admin permissions)
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-      return <SystemAdminDashboard user={user} initialStats={{
+      return <>
+        <SystemAdminDashboard user={user} initialStats={{
         total_organizations: 1,
         total_users: 1,
         active_apis: 0,
         system_load: 25,
         recent_activity: []
       }} />
+        <DebugOverlay />
+      </>
     }
     redirect('/login')
   }

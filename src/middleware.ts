@@ -123,18 +123,25 @@ export async function middleware(request: NextRequest) {
   try {
     // Allow static files and public routes first (before auth session)
     if (isPublicRoute(pathname) || isStaticFile(pathname)) {
-      return NextResponse.next({ request })
+      const resp = NextResponse.next({ request })
+      resp.headers.set('x-debug-mw', 'public_or_static')
+      resp.headers.set('x-debug-path', pathname)
+      return resp
     }
 
     // Handle API routes before auth session to prevent 401 errors
     if (pathname.startsWith('/api/')) {
       // TEMPORARY: Skip API authentication to prevent infinite recursion
-      console.log('⚠️  TEMPORARY: Skipping API authentication for admin routes')
-      return NextResponse.next({ request })
+      const resp = NextResponse.next({ request })
+      resp.headers.set('x-debug-mw', 'api_bypass')
+      resp.headers.set('x-debug-path', pathname)
+      return resp
     }
 
     // Handle auth session for protected routes
     const response = await updateSession(request)
+    response.headers.set('x-debug-mw', 'session_updated')
+    response.headers.set('x-debug-path', pathname)
 
     // Handle protected routes
     if (requiresAuthentication(pathname)) {
