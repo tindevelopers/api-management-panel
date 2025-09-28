@@ -84,7 +84,7 @@ export default function SecuritySettings({ user: _user }: SecuritySettingsProps)
         confirmPassword: '',
       })
       setMessage({ type: 'success', text: 'Password updated successfully!' })
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to update password' })
     } finally {
       setLoading(false)
@@ -105,7 +105,7 @@ export default function SecuritySettings({ user: _user }: SecuritySettingsProps)
         setShowQRCode(false)
         setMessage({ type: 'success', text: 'Two-factor authentication disabled!' })
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to update 2FA settings' })
     } finally {
       setLoading(false)
@@ -265,7 +265,7 @@ export default function SecuritySettings({ user: _user }: SecuritySettingsProps)
                         setTwoFactorEnabled(true);
                         setMessage({ type: 'success', text: 'Two-factor authentication set up successfully!' });
                         if (input) input.value = '';
-                      } catch (err) {
+                      } catch {
                         setMessage({ type: 'error', text: 'Failed to verify code. Please try again.' });
                       } finally {
                         setLoading(false);
@@ -336,7 +336,7 @@ export default function SecuritySettings({ user: _user }: SecuritySettingsProps)
                   // Simulate API call
                   await new Promise((res) => setTimeout(res, 800));
                   setMessage({ type: 'success', text: 'Signed out of all other sessions.' });
-                } catch (err) {
+                } catch {
                   setMessage({ type: 'error', text: 'Failed to sign out of other sessions.' });
                 } finally {
                   setLoading(false);
@@ -380,7 +380,7 @@ export default function SecuritySettings({ user: _user }: SecuritySettingsProps)
                   await new Promise((res) => setTimeout(res, 1000));
                   setMessage({ type: 'success', text: 'Account deleted. Redirecting...' });
                   // In real app, redirect to goodbye page or logout
-                } catch (err) {
+                } catch {
                   setMessage({ type: 'error', text: 'Failed to delete account. Please try again.' });
                 } finally {
                   setLoading(false);

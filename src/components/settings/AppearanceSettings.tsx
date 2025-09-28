@@ -49,7 +49,7 @@ export default function AppearanceSettings({ user }: AppearanceSettingsProps) {
     }
   }, [appearanceData.theme])
 
-  const handleInputChange = (field: keyof AppearanceData, value: any) => {
+  const handleInputChange = (field: keyof AppearanceData, value: string | boolean) => {
     setAppearanceData(prev => ({ ...prev, [field]: value }))
   }
 

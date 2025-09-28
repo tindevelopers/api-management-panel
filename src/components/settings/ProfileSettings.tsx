@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
@@ -62,7 +63,7 @@ export default function ProfileSettings({ user }: ProfileSettingsProps) {
 
       setProfileData(prev => ({ ...prev, avatar_url: publicUrl }))
       setMessage({ type: 'success', text: 'Avatar uploaded successfully!' })
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to upload avatar' })
     } finally {
       setLoading(false)
@@ -89,7 +90,7 @@ export default function ProfileSettings({ user }: ProfileSettingsProps) {
 
       await refreshAuth()
       setMessage({ type: 'success', text: 'Profile updated successfully!' })
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to update profile' })
     } finally {
       setLoading(false)
@@ -121,9 +122,11 @@ export default function ProfileSettings({ user }: ProfileSettingsProps) {
           <div className="relative">
             <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
               {profileData.avatar_url ? (
-                <img
+                <Image
                   src={profileData.avatar_url}
                   alt="Profile"
+                  width={96}
+                  height={96}
                   className="w-full h-full object-cover"
                 />
               ) : (

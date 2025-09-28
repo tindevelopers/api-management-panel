@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { User } from '@supabase/supabase-js'
-import { createClient } from '@/lib/supabase/client'
 
 interface ApiSettingsProps {
   user: User
@@ -110,7 +109,7 @@ export default function ApiSettings({ user: _user }: ApiSettingsProps) {
       setSelectedPermissions([])
       setShowNewKeyForm(false)
       setMessage({ type: 'success', text: 'API key created successfully!' })
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to create API key' })
     } finally {
       setLoading(false)
@@ -122,7 +121,7 @@ export default function ApiSettings({ user: _user }: ApiSettingsProps) {
     try {
       setApiKeys(prev => prev.filter(key => key.id !== keyId))
       setMessage({ type: 'success', text: 'API key revoked successfully!' })
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to revoke API key' })
     } finally {
       setLoading(false)
@@ -138,7 +137,7 @@ export default function ApiSettings({ user: _user }: ApiSettingsProps) {
           : endpoint
       ))
       setMessage({ type: 'success', text: 'Endpoint status updated successfully!' })
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to update endpoint status' })
     } finally {
       setLoading(false)
@@ -171,7 +170,7 @@ export default function ApiSettings({ user: _user }: ApiSettingsProps) {
     try {
       await navigator.clipboard.writeText(text)
       setMessage({ type: 'success', text: 'Copied to clipboard!' })
-    } catch (err) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to copy to clipboard' })
     }
   }

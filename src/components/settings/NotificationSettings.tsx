@@ -88,7 +88,7 @@ export default function NotificationSettings({ user: _user }: NotificationSettin
       if (error) throw error
 
       setMessage({ type: 'success', text: 'Notification preferences updated successfully!' })
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to update notification preferences' })
     } finally {
       setLoading(false)
