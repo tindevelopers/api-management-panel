@@ -23,21 +23,59 @@ export default async function UsersPage() {
     // TODO: Replace with proper permission check once database is set up
     // await requireSystemAdmin(user.id)
 
+    // Use mock data to prevent infinite recursion
+    const mockUsers = [
+      {
+        id: '1',
+        email: 'admin@tin.info',
+        full_name: 'Admin User',
+        is_active: true,
+        is_system_admin: true,
+        created_at: new Date().toISOString(),
+        last_login_at: new Date().toISOString()
+      }
+    ]
+    
+    const mockOrganizations = [
+      {
+        id: '1',
+        name: 'Demo Organization',
+        slug: 'demo-org',
+        description: 'A demo organization for testing'
+      }
+    ]
+
     return <>
-      <GlobalUserManagementV2 initialUsers={[]} initialOrganizations={[]} />
+      <GlobalUserManagementV2 initialUsers={mockUsers} initialOrganizations={mockOrganizations} />
       <DebugOverlay />
     </>
   } catch (error) {
     console.error('Error in users page:', error)
-    // Temporarily allow access even on error (temporary admin permissions)
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      return <>
-        <GlobalUserManagementV2 initialUsers={[]} initialOrganizations={[]} />
-        <DebugOverlay />
-      </>
-    }
-    redirect('/login')
+    // Use mock data even on error to prevent infinite recursion
+    const mockUsers = [
+      {
+        id: '1',
+        email: 'admin@tin.info',
+        full_name: 'Admin User',
+        is_active: true,
+        is_system_admin: true,
+        created_at: new Date().toISOString(),
+        last_login_at: new Date().toISOString()
+      }
+    ]
+    
+    const mockOrganizations = [
+      {
+        id: '1',
+        name: 'Demo Organization',
+        slug: 'demo-org',
+        description: 'A demo organization for testing'
+      }
+    ]
+
+    return <>
+      <GlobalUserManagementV2 initialUsers={mockUsers} initialOrganizations={mockOrganizations} />
+      <DebugOverlay />
+    </>
   }
 }

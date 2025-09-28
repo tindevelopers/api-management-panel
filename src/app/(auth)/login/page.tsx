@@ -57,8 +57,8 @@ export default function LoginPage() {
       if (error) {
         setError(error.message)
       } else {
-        // Redirect to admin organizations page for authenticated users
-        router.push('/admin/organizations')
+        // Redirect to dashboard page for authenticated users
+        router.push('/dashboard')
         router.refresh()
       }
     } catch {

@@ -184,6 +184,14 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                 API Management Panel
               </h1>
               <p className="text-gray-600">Welcome back, {user.email}</p>
+              <div className="mt-2">
+                <a 
+                  href="/admin" 
+                  className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  🔧 System Administration
+                </a>
+              </div>
             </div>
             <button
               onClick={handleLogout}
