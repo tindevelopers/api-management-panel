@@ -61,17 +61,18 @@ export default function SystemAdminDashboard({ user, initialStats }: SystemAdmin
       setStats(data)
     } catch (error) {
       console.error('Error fetching system stats:', error)
+      // Don't update stats on error, keep initial stats
     } finally {
       setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    // If no initial stats provided, fetch from API
-    if (!initialStats) {
+    // If no initial stats provided and user is authenticated, fetch from API
+    if (!initialStats && user) {
       fetchSystemStats()
     }
-  }, [initialStats]) // Removed fetchSystemStats from dependencies
+  }, [initialStats, user]) // Removed fetchSystemStats from dependencies
 
   const getLoadColor = (load: number) => {
     if (load < 30) return 'text-green-600'
@@ -141,12 +142,14 @@ export default function SystemAdminDashboard({ user, initialStats }: SystemAdmin
             <Link
               href="/admin/analytics"
               className="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium"
+              prefetch={false}
             >
               Analytics
             </Link>
             <Link
               href="/admin/settings"
               className="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium"
+              prefetch={false}
             >
               Settings
             </Link>

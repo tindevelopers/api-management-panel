@@ -56,6 +56,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await fetch('/api/auth/permissions')
       
       if (!response.ok) {
+        // If we get a 401, the user is not authenticated, so don't try to load data
+        if (response.status === 401) {
+          setAuthState({
+            user: null,
+            roles: [],
+            permissions: [],
+            organizations: [],
+            isSystemAdmin: false,
+            loading: false,
+            currentOrganization: null
+          })
+          return
+        }
         throw new Error('Failed to fetch user data')
       }
 
@@ -99,6 +112,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [loadUserData, supabase.auth])
 
   useEffect(() => {
+    // Only run on client side to prevent hydration mismatches
+    if (typeof window === 'undefined') return
+
     // Get initial session
     getSession()
 
