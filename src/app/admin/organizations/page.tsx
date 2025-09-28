@@ -10,7 +10,6 @@ interface Organization {
   name: string
   slug: string
   description: string | null
-  subscription_plan: string
   max_users: number
   max_apis: number
   created_at: string
@@ -82,7 +81,6 @@ async function OrganizationsList() {
       name,
       slug,
       description,
-      subscription_plan,
       max_users,
       max_apis,
       created_at,
@@ -133,9 +131,6 @@ async function OrganizationsList() {
                   Organization
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Plan
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Limits
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -163,17 +158,6 @@ async function OrganizationsList() {
                         </div>
                       )}
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      org.subscription_plan === 'enterprise' 
-                        ? 'bg-purple-100 text-purple-800'
-                        : org.subscription_plan === 'pro'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {org.subscription_plan}
-                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <div>Users: {org.max_users}</div>

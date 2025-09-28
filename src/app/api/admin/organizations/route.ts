@@ -54,18 +54,7 @@ export async function GET() {
     // Fetch organizations
     const { data: organizations, error: orgsError } = await supabase
       .from('organizations')
-      .select(`
-        id,
-        name,
-        slug,
-        description,
-        subscription_plan,
-        max_users,
-        max_apis,
-        created_at,
-        updated_at,
-        is_active
-      `)
+      .select('id, name, slug, description, max_users, max_apis, created_at, updated_at, is_active')
       .eq('is_active', true)
       .order('created_at', { ascending: false })
 
@@ -140,7 +129,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { name, slug, description, subscription_plan, max_users, max_apis } = body
+    const { name, slug, description, max_users, max_apis } = body
 
     // Validate required fields
     if (!name || !slug) {
@@ -157,7 +146,6 @@ export async function POST(request: Request) {
         name,
         slug,
         description,
-        subscription_plan: subscription_plan || 'free',
         max_users: max_users || 10,
         max_apis: max_apis || 5,
         is_active: true
