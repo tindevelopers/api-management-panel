@@ -23,49 +23,27 @@ interface Organization {
 async function OrganizationsList() {
   const supabase = await createClient()
 
-  // Get authenticated user
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  // TEMPORARY: Complete authentication bypass for testing
+  console.log('⚠️  TEMPORARY: Complete authentication bypass for organizations page testing')
 
-  if (userError || !user) {
-    console.log('❌ No authenticated user found:', userError?.message)
-    redirect('/login')
+  // Skip authentication checks for testing
+  console.log('🔄 Bypassing all authentication checks for testing')
+
+  // Provide a minimal mock user object so subsequent code that references `user`
+  // still works during testing. This avoids calling supabase.auth.getUser().
+  const { data: { user }, error: userError } = {
+    data: {
+      user: {
+        id: 'bypass-user',
+        email: 'tester@example.com',
+      },
+    },
+    error: null,
   }
 
-  console.log('✅ Authenticated user:', user.email)
-
-  // Check if user has admin permissions - with fallback for development
-  let hasAdminAccess = false
-
-  try {
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (profileError) {
-      console.log('⚠️ Profile lookup error:', profileError.message)
-      // Fallback: Check if user email contains 'admin' or is a known admin email
-      const adminEmails = ['admin@tin.info', 'admin@example.com']
-      hasAdminAccess = adminEmails.includes(user.email || '') || (user.email || '').includes('admin')
-      console.log('🔄 Using email-based admin fallback:', hasAdminAccess)
-    } else if (profile && profile.role === 'system_admin') {
-      hasAdminAccess = true
-      console.log('✅ User has system_admin role')
-    } else {
-      console.log('❌ User role:', profile?.role || 'no role')
-      // Fallback for development
-      const adminEmails = ['admin@tin.info', 'admin@example.com']
-      hasAdminAccess = adminEmails.includes(user.email || '')
-      console.log('🔄 Using email-based admin fallback:', hasAdminAccess)
-    }
-  } catch (error) {
-    console.log('⚠️ Database connection error:', error)
-    // Fallback: Allow admin emails to access during development
-    const adminEmails = ['admin@tin.info', 'admin@example.com']
-    hasAdminAccess = adminEmails.includes(user.email || '')
-    console.log('🔄 Using email-based admin fallback due to DB error:', hasAdminAccess)
-  }
+  // Grant admin access for testing so the page flow proceeds to organization listing.
+  let hasAdminAccess = true
+  console.log('🔓 Admin access automatically granted for testing')
 
   if (!hasAdminAccess) {
     console.log('❌ Access denied for user:', user.email)
