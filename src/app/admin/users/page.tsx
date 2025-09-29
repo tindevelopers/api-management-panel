@@ -12,7 +12,7 @@ export default async function UsersPage() {
   try {
     // TEMPORARY: Skip authentication to prevent infinite recursion
     console.log('⚠️  TEMPORARY: Skipping authentication for users page')
-    
+
     // const supabase = await createClient()
     // const {
     //   data: { user },
@@ -25,83 +25,64 @@ export default async function UsersPage() {
     // TODO: Replace with proper permission check once database is set up
     // await requireSystemAdmin(user.id)
 
-    // Use mock data to prevent infinite recursion
-    const mockUsers = [
-      {
-        id: '1',
-        email: 'admin@tin.info',
-        full_name: 'Admin User',
-        is_active: true,
-        is_system_admin: true,
-        created_at: new Date().toISOString(),
-        last_login_at: new Date().toISOString(),
-        roles: [],
-        permissions: [],
-        app_metadata: {},
-        user_metadata: {},
-        aud: 'authenticated'
-      }
-    ]
-    
-    const mockOrganizations = [
-      {
-        id: '1',
-        name: 'Demo Organization',
-        slug: 'demo-org',
-        description: 'A demo organization for testing',
-        subscription_plan: SubscriptionPlan.FREE,
-        max_users: 10,
-        max_apis: 5,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        settings: {},
-        is_active: true
-      }
-    ]
+    // Fetch real organizations from the database
+    const supabase = await createClient()
 
-    return <>
-      <GlobalUserManagementV2 initialUsers={mockUsers} initialOrganizations={mockOrganizations} />
-      <DebugOverlay />
-    </>
+    console.log('🔍 Fetching organizations for users page...')
+    const { data: organizations, error: orgsError } = await supabase
+      .from('organizations')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+
+    if (orgsError) {
+      console.error('Error fetching organizations:', orgsError)
+      // Fall back to empty array if there's an error
+    }
+
+    console.log('Successfully fetched organizations:', organizations?.length || 0)
+
+    // Use real organizations data or empty array as fallback
+    const organizationsData = organizations || []
+
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            User Management
+          </h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            Manage users, roles, and permissions across all organizations
+          </p>
+        </div>
+
+        <GlobalUserManagementV2
+          initialOrganizations={organizationsData}
+        />
+
+        {process.env.NODE_ENV === 'development' && (
+          <DebugOverlay />
+        )}
+      </div>
+    )
   } catch (error) {
     console.error('Error in users page:', error)
-    // Use mock data even on error to prevent infinite recursion
-    const mockUsers = [
-      {
-        id: '1',
-        email: 'admin@tin.info',
-        full_name: 'Admin User',
-        is_active: true,
-        is_system_admin: true,
-        created_at: new Date().toISOString(),
-        last_login_at: new Date().toISOString(),
-        roles: [],
-        permissions: [],
-        app_metadata: {},
-        user_metadata: {},
-        aud: 'authenticated'
-      }
-    ]
-    
-    const mockOrganizations = [
-      {
-        id: '1',
-        name: 'Demo Organization',
-        slug: 'demo-org',
-        description: 'A demo organization for testing',
-        subscription_plan: SubscriptionPlan.FREE,
-        max_users: 10,
-        max_apis: 5,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        settings: {},
-        is_active: true
-      }
-    ]
 
-    return <>
-      <GlobalUserManagementV2 initialUsers={mockUsers} initialOrganizations={mockOrganizations} />
-      <DebugOverlay />
-    </>
+    // Return error page
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
+          <h1 className="text-xl font-semibold text-red-800 dark:text-red-200 mb-2">
+            Error Loading Users Page
+          </h1>
+          <p className="text-red-600 dark:text-red-300">
+            {error instanceof Error ? error.message : 'An unexpected error occurred'}
+          </p>
+          <p className="text-sm text-red-500 dark:text-red-400 mt-2">
+            Please check the console for more details.
+          </p>
+        </div>
+      </div>
+    )
   }
 }

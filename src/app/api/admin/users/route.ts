@@ -5,13 +5,13 @@ import { requireSystemAdmin } from '@/lib/permissions'
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
-    
+
     // TEMPORARY: Skip authentication for testing
     console.log('⚠️  TEMPORARY: Skipping authentication for testing')
-    
+
     // Get current user and verify system admin permissions
     const { data: { user }, error: userError } = await supabase.auth.getUser()
-    
+
     if (userError || !user) {
       console.log('⚠️  No authenticated user, but allowing access for testing')
     }
@@ -37,36 +37,57 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
 
-    // TEMPORARY: Return mock data to test the API structure
-    console.log('⚠️  TEMPORARY: Returning mock data instead of querying database')
-    
-    const users = [
-      {
-        id: '11111111-1111-1111-1111-111111111111',
-        email: 'test@example.com',
-        full_name: 'Test User',
-        avatar_url: null,
-        is_active: true,
-        last_login_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-    ]
-    
-    const usersError = null as Error | null
+    console.log('🔍 Fetching users from database...')
 
-    if (usersError) {
-      console.error('Error fetching users:', usersError)
+    // Query profiles table (which represents users in our system)
+    let profilesQuery = supabase
+      .from('profiles')
+      .select(`
+        id,
+        user_id,
+        email,
+        full_name,
+        avatar_url,
+        bio,
+        phone,
+        location,
+        website,
+        created_at,
+        updated_at
+      `)
+
+    // Apply search filter if provided
+    if (search) {
+      profilesQuery = profilesQuery.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`)
+    }
+
+    // Apply date filters
+    if (created_after) {
+      profilesQuery = profilesQuery.gte('created_at', created_after)
+    }
+    if (created_before) {
+      profilesQuery = profilesQuery.lte('created_at', created_before)
+    }
+
+    // Apply pagination
+    profilesQuery = profilesQuery
+      .range(offset, offset + limit - 1)
+      .order('created_at', { ascending: false })
+
+    const { data: profiles, error: profilesError } = await profilesQuery
+
+    if (profilesError) {
+      console.error('Error fetching profiles:', profilesError)
       return NextResponse.json(
-        { error: 'Failed to fetch users', details: usersError.message },
+        { error: 'Failed to fetch users', details: profilesError.message },
         { status: 500 }
       )
     }
 
-    console.log('Successfully fetched users:', users?.length || 0)
+    console.log('Successfully fetched profiles:', profiles?.length || 0)
 
-    // If no users found, return empty result
-    if (!users || users.length === 0) {
+    // If no profiles found, return empty result
+    if (!profiles || profiles.length === 0) {
       return NextResponse.json({
         users: [],
         pagination: {
@@ -86,9 +107,22 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // TEMPORARY: Use mock count
-    const count = 1
-    const countError = null as Error | null
+    // Get count of total profiles for pagination
+    let countQuery = supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+
+    if (search) {
+      countQuery = countQuery.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`)
+    }
+    if (created_after) {
+      countQuery = countQuery.gte('created_at', created_after)
+    }
+    if (created_before) {
+      countQuery = countQuery.lte('created_at', created_before)
+    }
+
+    const { count, error: countError } = await countQuery
 
     if (countError) {
       console.error('Error fetching user count:', countError)
@@ -100,23 +134,58 @@ export async function GET(request: NextRequest) {
 
     console.log('Successfully fetched user count:', count)
 
-    // For each user, fetch their roles and organizations
+    // For each profile, fetch their roles and organizations
     const usersWithRoles = await Promise.all(
-      users.map(async (user) => {
-        // TEMPORARY: Skip roles query to avoid infinite recursion
-        console.log('⚠️  TEMPORARY: Skipping roles query for user:', user.id)
-        
+      profiles.map(async (profile) => {
+        console.log('🔍 Fetching roles for user:', profile.user_id || profile.id)
+
+        // Query user roles for this user
+        const { data: userRoles, error: rolesError } = await supabase
+          .from('user_roles')
+          .select(`
+            id,
+            role_type,
+            permissions,
+            is_active,
+            created_at,
+            organization_id,
+            organizations (
+              id,
+              name,
+              slug
+            )
+          `)
+          .eq('user_id', profile.user_id || profile.id)
+          .eq('is_active', true)
+
+        if (rolesError) {
+          console.error('Error fetching roles for user:', profile.user_id || profile.id, rolesError)
+          // Continue with empty roles rather than failing
+        }
+
+        // Extract permissions from roles
+        const permissions = userRoles?.reduce((acc, role) => {
+          if (role.permissions && Array.isArray(role.permissions)) {
+            return [...acc, ...role.permissions]
+          }
+          return acc
+        }, [] as string[]) || []
+
+        // Extract organizations from roles
+        const organizations = userRoles?.map(role => role.organizations).filter(Boolean) || []
+
         return {
-          id: user.id,
-          email: user.email,
-          full_name: user.full_name,
-          avatar_url: user.avatar_url,
-          created_at: user.created_at,
-          last_sign_in_at: user.last_login_at, // Use last_login_at as last_sign_in_at
-          last_login_at: user.last_login_at,
-          is_active: user.is_active,
-          roles: [], // TEMPORARY: Empty roles array
-          organizations: [] // TEMPORARY: Empty organizations array
+          id: profile.user_id || profile.id, // Use user_id if available, fallback to id
+          email: profile.email,
+          full_name: profile.full_name,
+          avatar_url: profile.avatar_url,
+          created_at: profile.created_at,
+          last_sign_in_at: null, // This would come from auth.users if we had access
+          last_login_at: null, // This would come from auth.users if we had access
+          is_active: true, // Assume active if profile exists
+          roles: userRoles || [],
+          organizations: organizations,
+          permissions: permissions
         }
       })
     )
@@ -124,10 +193,23 @@ export async function GET(request: NextRequest) {
     // Filter users by role or organization if specified
     let filteredUsers = usersWithRoles
 
-    if (role_type || organization_id) {
-      // TEMPORARY: Since we're using empty roles arrays, skip filtering for now
-      console.log('⚠️  TEMPORARY: Skipping role/organization filtering due to empty roles')
-      filteredUsers = usersWithRoles
+    if (role_type) {
+      filteredUsers = filteredUsers.filter(user =>
+        user.roles.some(role => role.role_type === role_type)
+      )
+    }
+
+    if (organization_id) {
+      filteredUsers = filteredUsers.filter(user =>
+        user.organizations.some((org: any) => org?.id === organization_id)
+      )
+    }
+
+    if (is_active !== null && is_active !== undefined) {
+      const activeFilter = is_active === 'true'
+      filteredUsers = filteredUsers.filter(user =>
+        user.roles.some(role => role.is_active === activeFilter)
+      )
     }
 
     return NextResponse.json({
@@ -149,64 +231,17 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: unknown) {
-    console.error('Error in admin users API:', error)
-    
-    if (error && typeof error === 'object' && 'name' in error && error.name === 'PermissionError') {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      )
-    }
+    console.error('Unexpected error in users API:', error)
+
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    const errorStack = error instanceof Error ? error.stack : undefined
 
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
-
-export async function POST(request: NextRequest) {
-  try {
-    const supabase = await createClient()
-    
-    // Get current user and verify system admin permissions
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    try {
-      await requireSystemAdmin(user.id)
-    } catch (error) {
-      // For development/testing, allow any authenticated user to access admin endpoints
-      console.log('System admin check failed, allowing access for testing:', error)
-    }
-
-    const { email, full_name } = await request.json()
-
-    // Create user in auth.users (this would typically be done through Supabase Auth Admin API)
-    // For now, we'll just return success
-    return NextResponse.json({
-      message: 'User creation would be implemented here',
-      user: { email, full_name }
-    })
-
-  } catch (error: unknown) {
-    console.error('Error creating user:', error)
-    
-    if (error && typeof error === 'object' && 'name' in error && error.name === 'PermissionError') {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      )
-    }
-
-    return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Internal server error',
+        details: errorMessage,
+        stack: process.env.NODE_ENV === 'development' ? errorStack : undefined
+      },
       { status: 500 }
     )
   }

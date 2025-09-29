@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
+import OrganizationsClient from '@/components/admin/OrganizationsClient'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -21,10 +22,10 @@ interface Organization {
 
 async function OrganizationsList() {
   const supabase = await createClient()
-  
+
   // Get authenticated user
   const { data: { user }, error: userError } = await supabase.auth.getUser()
-  
+
   if (userError || !user) {
     console.log('❌ No authenticated user found:', userError?.message)
     redirect('/login')
@@ -34,7 +35,7 @@ async function OrganizationsList() {
 
   // Check if user has admin permissions - with fallback for development
   let hasAdminAccess = false
-  
+
   try {
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
@@ -107,87 +108,7 @@ async function OrganizationsList() {
     )
   }
 
-  return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Organizations</h1>
-        <p className="text-gray-600 mt-1">Manage all organizations in the system</p>
-      </div>
-
-      {!organizations || organizations.length === 0 ? (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-          <div className="text-gray-400 text-4xl mb-4">🏢</div>
-          <h3 className="text-gray-900 font-medium mb-2">No Organizations Found</h3>
-          <p className="text-gray-600 text-sm">
-            There are no organizations in the system yet.
-          </p>
-        </div>
-      ) : (
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Organization
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Limits
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {organizations.map((org: Organization) => (
-                <tr key={org.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {org.name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {org.slug}
-                      </div>
-                      {org.description && (
-                        <div className="text-xs text-gray-400 mt-1">
-                          {org.description}
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div>Users: {org.max_users}</div>
-                    <div>APIs: {org.max_apis}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(org.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <a
-                      href={`/admin/organizations/${org.id}`}
-                      className="text-indigo-600 hover:text-indigo-900 mr-4"
-                    >
-                      View
-                    </a>
-                    <button 
-                      type="button"
-                      className="text-gray-400 hover:text-gray-600"
-                    >
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  )
+  return <OrganizationsClient initialOrganizations={organizations || []} />
 }
 
 function LoadingState() {
