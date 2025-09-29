@@ -133,7 +133,7 @@ class Logger {
   /**
    * Core logging method
    */
-  private log(level: LogLevel, message: string, data?: any, category: LogCategory = LogCategory.SYSTEM): void {
+  public log(level: LogLevel, message: string, data?: any, category: LogCategory = LogCategory.SYSTEM): void {
     // Check if we should log this level
     if (!this.shouldLog(level)) {
       return

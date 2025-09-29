@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Organization, SubscriptionPlan, Permission } from '@/types/multi-role'
+import { authenticatedApiCall } from '@/lib/utils/api-client'
 import { 
   Building2, 
   Plus, 
@@ -30,27 +31,35 @@ interface OrganizationWithStats extends Organization {
 
 interface OrganizationManagementProps {
   className?: string
+  initialOrganizations?: Organization[]
 }
 
-export default function OrganizationManagement({ className = '' }: OrganizationManagementProps) {
-  const [organizations, setOrganizations] = useState<OrganizationWithStats[]>([])
-  const [loading, setLoading] = useState(true)
+export default function OrganizationManagement({ className = '', initialOrganizations = [] }: OrganizationManagementProps) {
+  const [organizations, setOrganizations] = useState<OrganizationWithStats[]>(initialOrganizations.map(org => ({
+    ...org,
+    stats: {
+      total_users: 0,
+      active_apis: 0,
+      storage_used: 0,
+      last_activity: new Date().toISOString()
+    }
+  })))
+  const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterPlan, setFilterPlan] = useState<SubscriptionPlan | 'all'>('all')
   const [selectedOrgs, setSelectedOrgs] = useState<string[]>([])
   const [showCreateForm, setShowCreateForm] = useState(false)
 
-  useEffect(() => {
-    fetchOrganizations()
-  }, [])
-
-  const fetchOrganizations = async () => {
+  const fetchOrganizations = useCallback(async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/admin/organizations')
       
+      const url = '/api/admin/organizations'
+      const response = await authenticatedApiCall(url)
+
       if (!response.ok) {
-        throw new Error('Failed to fetch organizations')
+        const errorText = await response.text()
+        throw new Error(`Failed to fetch organizations: ${response.status} ${response.statusText}`)
       }
 
       const data = await response.json()
@@ -60,7 +69,16 @@ export default function OrganizationManagement({ className = '' }: OrganizationM
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    // If no initial data provided, fetch from API
+    if (!initialOrganizations || initialOrganizations.length === 0) {
+      fetchOrganizations().catch(() => setLoading(false))
+    } else {
+      setLoading(false)
+    }
+  }, [initialOrganizations?.length])
 
   const filteredOrganizations = organizations.filter(org => {
     const matchesSearch = org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -419,6 +437,7 @@ export default function OrganizationManagement({ className = '' }: OrganizationM
           </div>
         </div>
       )}
+
     </PermissionGuard>
   )
 }

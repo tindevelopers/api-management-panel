@@ -6,7 +6,11 @@ export async function updateSession(request: NextRequest) {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    // If environment variables are missing, redirect to login
+    // If environment variables are missing, allow public routes but redirect protected routes to login
+    const publicRoutes = ['/', '/login', '/signup', '/auth/callback', '/setup', '/test', '/simple', '/test-org']
+    if (publicRoutes.some(route => request.nextUrl.pathname.startsWith(route))) {
+      return NextResponse.next({ request })
+    }
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
@@ -25,13 +29,22 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
+          console.log('🍪 Setting cookies:', cookiesToSet.map(c => ({ name: c.name, value: c.value?.substring(0, 20) + '...' })))
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
+          cookiesToSet.forEach(({ name, value, options }) => {
+            // Ensure cookies are set with proper options
+            const cookieOptions = {
+              ...options,
+              path: '/',
+              secure: process.env.NODE_ENV === 'production',
+              httpOnly: true,
+              sameSite: 'lax' as const
+            }
+            supabaseResponse.cookies.set(name, value, cookieOptions)
+          })
         },
       },
     }
@@ -45,12 +58,20 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/signup') &&
-    !request.nextUrl.pathname.startsWith('/auth')
-  ) {
+  // Debug logging
+  console.log('🔍 Middleware Debug:', {
+    pathname: request.nextUrl.pathname,
+    hasUser: !!user,
+    userId: user?.id,
+    cookies: request.cookies.getAll().map(c => c.name)
+  })
+
+  // Only redirect to login if there's no user and it's not a public route
+  const publicRoutes = ['/', '/login', '/signup', '/auth', '/setup', '/test', '/simple', '/test-org']
+  const isPublicRoute = publicRoutes.some(route => request.nextUrl.pathname.startsWith(route))
+  
+  if (!user && !isPublicRoute) {
+    console.log('🚫 No user found, redirecting to login')
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
     url.pathname = '/login'

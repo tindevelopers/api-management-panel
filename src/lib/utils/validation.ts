@@ -59,7 +59,7 @@ export const organizationSchema = z.object({
   subscription_plan: z.enum(['free', 'basic', 'premium', 'enterprise']),
   max_users: z.number().int().min(1, 'Max users must be at least 1'),
   max_apis: z.number().int().min(1, 'Max APIs must be at least 1'),
-  settings: z.record(z.unknown()).optional()
+  settings: z.record(z.string(), z.unknown()).optional()
 })
 
 export const updateOrganizationSchema = organizationSchema.partial()
@@ -187,7 +187,7 @@ export function validateData<T>(
     if (error instanceof z.ZodError) {
       const errors: Record<string, string[]> = {}
       
-      error.errors.forEach((err) => {
+      error.issues.forEach((err: any) => {
         const path = err.path.join('.')
         if (!errors[path]) {
           errors[path] = []

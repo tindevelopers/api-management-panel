@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
+import { authenticatedApiCall } from '@/lib/utils/api-client'
 import { 
   Building2, 
   Users, 
@@ -19,6 +20,7 @@ import Link from 'next/link'
 
 interface SystemAdminDashboardProps {
   user: User
+  initialStats?: SystemStats
 }
 
 interface SystemStats {
@@ -35,25 +37,21 @@ interface SystemStats {
   }>
 }
 
-export default function SystemAdminDashboard({ user }: SystemAdminDashboardProps) {
-  const [stats, setStats] = useState<SystemStats>({
+export default function SystemAdminDashboard({ user, initialStats }: SystemAdminDashboardProps) {
+  const [stats, setStats] = useState<SystemStats>(initialStats || {
     total_organizations: 0,
     total_users: 0,
     active_apis: 0,
     system_load: 0,
     recent_activity: []
   })
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!initialStats)
   const router = useRouter()
 
-  useEffect(() => {
-    fetchSystemStats()
-  }, [])
-
-  const fetchSystemStats = async () => {
+  const fetchSystemStats = useCallback(async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/admin/stats')
+      const response = await authenticatedApiCall('/api/admin/stats')
       
       if (!response.ok) {
         throw new Error('Failed to fetch system stats')
@@ -63,10 +61,18 @@ export default function SystemAdminDashboard({ user }: SystemAdminDashboardProps
       setStats(data)
     } catch (error) {
       console.error('Error fetching system stats:', error)
+      // Don't update stats on error, keep initial stats
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    // If no initial stats provided and user is authenticated, fetch from API
+    if (!initialStats && user) {
+      fetchSystemStats()
+    }
+  }, [initialStats, user]) // Removed fetchSystemStats from dependencies
 
   const getLoadColor = (load: number) => {
     if (load < 30) return 'text-green-600'
@@ -136,12 +142,14 @@ export default function SystemAdminDashboard({ user }: SystemAdminDashboardProps
             <Link
               href="/admin/analytics"
               className="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium"
+              prefetch={false}
             >
               Analytics
             </Link>
             <Link
               href="/admin/settings"
               className="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium"
+              prefetch={false}
             >
               Settings
             </Link>
