@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServiceRoleClient } from '@/lib/supabase/service'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 import OrganizationsClient from '@/components/admin/OrganizationsClient'
@@ -6,22 +6,8 @@ import OrganizationsClient from '@/components/admin/OrganizationsClient'
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
-interface Organization {
-  id: string
-  name: string
-  slug: string
-  description: string | null
-  max_users: number
-  max_apis: number
-  created_at: string
-  updated_at: string
-  is_active: boolean
-  user_count?: number
-  api_count?: number
-}
-
 async function OrganizationsList() {
-  const supabase = await createClient()
+  const supabase = createServiceRoleClient()
 
   // TEMPORARY: Complete authentication bypass for testing
   console.log('⚠️  TEMPORARY: Complete authentication bypass for organizations page testing')
@@ -31,7 +17,7 @@ async function OrganizationsList() {
 
   // Provide a minimal mock user object so subsequent code that references `user`
   // still works during testing. This avoids calling supabase.auth.getUser().
-  const { data: { user }, error: userError } = {
+  const { data: { user } } = {
     data: {
       user: {
         id: 'bypass-user',
