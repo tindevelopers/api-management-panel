@@ -16,6 +16,7 @@ async function OrganizationsList() {
   console.log('🔄 Bypassing all authentication checks for testing')
 
   // Provide a minimal mock user object so subsequent code that references `user`
+  // Provide a minimal mock user object so subsequent code that references `user`
   // still works during testing. This avoids calling supabase.auth.getUser().
   const { data: { user } } = {
     data: {
@@ -24,8 +25,7 @@ async function OrganizationsList() {
         email: 'tester@example.com',
       },
     },
-    error: null,
-  }
+  } as { data: { user: any }, error: null }
 
   // Grant admin access for testing so the page flow proceeds to organization listing.
   const hasAdminAccess = true
