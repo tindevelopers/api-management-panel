@@ -28,7 +28,7 @@ async function OrganizationsList() {
   }
 
   // Grant admin access for testing so the page flow proceeds to organization listing.
-  let hasAdminAccess = true
+  const hasAdminAccess = true
   console.log('🔓 Admin access automatically granted for testing')
 
   if (!hasAdminAccess) {
