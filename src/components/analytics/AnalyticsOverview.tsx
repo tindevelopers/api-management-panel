@@ -1,13 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { 
-  ChartBarIcon, 
-  ClockIcon, 
-  TrendingUpIcon,
-  TrendingDownIcon,
+import { useState, useEffect } from 'react'
+import { User } from '@supabase/supabase-js'
+import {
+  ChartBarIcon,
+  ClockIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
   EyeIcon,
-  ServerIcon
+  ServerIcon,
+  ExclamationTriangleIcon
 } from '@heroicons/react/24/outline'
 
 interface MetricCard {
@@ -20,6 +22,8 @@ interface MetricCard {
 
 export default function AnalyticsOverview() {
   const [timeRange, setTimeRange] = useState('7d')
+
+// ... existing code ...
 
   const metrics: MetricCard[] = [
     {
@@ -41,7 +45,7 @@ export default function AnalyticsOverview() {
       value: '99.2%',
       change: '+0.3%',
       changeType: 'increase',
-      icon: TrendingUpIcon
+      icon: ArrowTrendingUpIcon
     },
     {
       title: 'Active Endpoints',
@@ -82,9 +86,9 @@ export default function AnalyticsOverview() {
   const getChangeIcon = (changeType: string) => {
     switch (changeType) {
       case 'increase':
-        return <TrendingUpIcon className="w-4 h-4 text-green-600" />
+        return <ArrowTrendingUpIcon className="w-4 h-4 text-green-600" />
       case 'decrease':
-        return <TrendingDownIcon className="w-4 h-4 text-red-600" />
+        return <ArrowTrendingDownIcon className="w-4 h-4 text-red-600" />
       default:
         return null
     }

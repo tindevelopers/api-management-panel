@@ -1,15 +1,20 @@
 'use client'
 
-import { useState } from 'react'
-import { 
-  DatabaseIcon, 
-  TableCellsIcon,
+import { useState, useEffect } from 'react'
+import { User } from '@supabase/supabase-js'
+import {
   CircleStackIcon,
-  ShieldCheckIcon,
-  ExclamationTriangleIcon,
+  ServerIcon,
   CheckCircleIcon,
+  ExclamationTriangleIcon,
+  XCircleIcon,
   ClockIcon,
   PlusIcon,
+  EyeIcon,
+  PencilIcon,
+  TrashIcon,
+  TableCellsIcon,
+  ShieldCheckIcon,
   CogIcon
 } from '@heroicons/react/24/outline'
 
@@ -110,16 +115,17 @@ export default function DatabaseOverview() {
   }
 
   const getDatabaseIcon = (type: string) => {
-    switch (type) {
+    switch (type.toLowerCase()) {
       case 'postgresql':
+        return <CircleStackIcon className="w-8 h-8 text-blue-600" />
       case 'mysql':
-        return <DatabaseIcon className="w-8 h-8 text-blue-600" />
+        return <CircleStackIcon className="w-8 h-8 text-orange-600" />
       case 'mongodb':
         return <CircleStackIcon className="w-8 h-8 text-green-600" />
       case 'redis':
-        return <DatabaseIcon className="w-8 h-8 text-red-600" />
+        return <CircleStackIcon className="w-8 h-8 text-red-600" />
       default:
-        return <DatabaseIcon className="w-8 h-8 text-gray-600" />
+        return <CircleStackIcon className="w-8 h-8 text-gray-600" />
     }
   }
 
@@ -155,7 +161,7 @@ export default function DatabaseOverview() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
-            <DatabaseIcon className="w-8 h-8 text-indigo-600" />
+            <CircleStackIcon className="w-8 h-8 text-indigo-600" />
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Total Databases</p>
               <p className="text-2xl font-semibold text-gray-900">{databases.length}</p>

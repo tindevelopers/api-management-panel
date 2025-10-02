@@ -3,21 +3,20 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { 
-  ChevronDownIcon, 
-  ChevronRightIcon,
+import {
   HomeIcon,
   ChartBarIcon,
-  UsersIcon,
-  CogIcon,
-  DatabaseIcon,
   CloudIcon,
-  ShieldCheckIcon,
-  DocumentTextIcon,
+  CircleStackIcon,
+  UsersIcon,
+  BuildingOfficeIcon,
   BellIcon,
   CreditCardIcon,
-  BuildingOfficeIcon,
-  KeyIcon
+  CogIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  Bars3Icon,
+  XMarkIcon
 } from '@heroicons/react/24/outline'
 
 interface MenuItem {
@@ -61,10 +60,10 @@ const menuItems: MenuItem[] = [
   },
   {
     title: 'Database',
-    icon: DatabaseIcon,
+    icon: CircleStackIcon,
     children: [
-      { title: 'Overview', href: '/dashboard/database', icon: DatabaseIcon },
-      { title: 'Tables', href: '/dashboard/database/tables', icon: DatabaseIcon },
+      { title: 'Overview', href: '/dashboard/database', icon: CircleStackIcon },
+      { title: 'Tables', href: '/dashboard/database/tables', icon: CircleStackIcon },
       { title: 'Queries', href: '/dashboard/database/queries', icon: DocumentTextIcon },
       { title: 'Backups', href: '/dashboard/database/backups', icon: ShieldCheckIcon }
     ]

@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { User } from '@supabase/supabase-js'
-import { 
-  ChartBarIcon, 
-  CloudIcon, 
-  DatabaseIcon, 
+import {
+  ChartBarIcon,
+  CloudIcon,
+  CircleStackIcon,
   UsersIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
@@ -134,7 +134,7 @@ export default function DashboardOverview({ user }: DashboardOverviewProps) {
       value: databases.filter(db => db.status === 'active').length.toString(),
       change: 'All systems operational',
       changeType: 'neutral',
-      icon: DatabaseIcon
+      icon: CircleStackIcon
     },
     {
       title: 'API Requests',
@@ -228,7 +228,7 @@ export default function DashboardOverview({ user }: DashboardOverviewProps) {
               href="/dashboard/database"
               className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200"
             >
-              <DatabaseIcon className="w-8 h-8 text-indigo-600 mr-3" />
+              <CircleStackIcon className="w-8 h-8 text-indigo-600 mr-3" />
               <div>
                 <p className="font-medium text-gray-900">Database</p>
                 <p className="text-sm text-gray-500">Manage your databases</p>
