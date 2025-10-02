@@ -1,21 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import DashboardLayout from '@/components/ui/DashboardLayout'
-import DashboardOverview from '@/components/dashboard/DashboardOverview'
+import AnalyticsOverview from '@/components/analytics/AnalyticsOverview'
 
-export default async function DashboardPage() {
+export default async function AnalyticsPage() {
   try {
     // TEMPORARY: Skip authentication to prevent infinite recursion
-    console.log('⚠️  TEMPORARY: Skipping authentication for dashboard page')
-
-    // const supabase = await createClient()
-    // const {
-    //   data: { user },
-    // } = await supabase.auth.getUser()
-    // if (!user) {
-    //   redirect('/login')
-    // }
-
+    console.log('⚠️  TEMPORARY: Skipping authentication for analytics page')
+    
     // Use mock user for now
     const mockUser = {
       id: '1',
@@ -28,12 +20,12 @@ export default async function DashboardPage() {
     }
 
     return (
-      <DashboardLayout
-        user={mockUser}
-        title="Dashboard"
-        subtitle="Welcome to your API Management Panel"
+      <DashboardLayout 
+        user={mockUser} 
+        title="Analytics" 
+        subtitle="Monitor your API usage and performance"
       >
-        <DashboardOverview user={mockUser} />
+        <AnalyticsOverview />
       </DashboardLayout>
     )
   } catch {
