@@ -118,7 +118,7 @@ npm run dev --filter=web
 npm run build --filter=!web
 ```
 
-## � Deployment
+## 🚀 Deployment
 
 ### Vercel Deployment
 
@@ -154,7 +154,7 @@ For detailed deployment instructions, see:
 - Build configuration optimized for Turborepo
 - Documentation complete
 
-## �📚 Learn More
+## 📚 Learn More
 
 - [Turborepo Documentation](https://turbo.build/repo/docs)
 - [Next.js Documentation](https://nextjs.org/docs)
