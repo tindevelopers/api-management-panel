@@ -118,7 +118,43 @@ npm run dev --filter=web
 npm run build --filter=!web
 ```
 
-## 📚 Learn More
+## � Deployment
+
+### Vercel Deployment
+
+This monorepo is configured for deployment on Vercel. The configuration is optimized for Turborepo:
+
+**Vercel Configuration:**
+- **Root Directory:** `apps/web`
+- **Framework:** Next.js (auto-detected)
+- **Build Command:** Auto-detected by Vercel
+- **Install Command:** Auto-detected by Vercel
+
+**Quick Deploy:**
+1. Connect your repository to Vercel
+2. Set Root Directory to `apps/web` in project settings
+3. Configure environment variables
+4. Deploy!
+
+**Environment Variables Required:**
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `NEXT_PUBLIC_APP_URL`
+
+For detailed deployment instructions, see:
+- [`apps/web/README.md`](./apps/web/README.md) - Application-specific deployment guide
+- [`CONFIGURATION-COMPLETE.md`](./CONFIGURATION-COMPLETE.md) - Deployment configuration summary
+- [`VERCEL-QUICK-FIX.md`](./VERCEL-QUICK-FIX.md) - Quick deployment reference
+
+### Deployment Status
+
+✅ **Configured and Ready**
+- Vercel Root Directory set to `apps/web`
+- Build configuration optimized for Turborepo
+- Documentation complete
+
+## �📚 Learn More
 
 - [Turborepo Documentation](https://turbo.build/repo/docs)
 - [Next.js Documentation](https://nextjs.org/docs)

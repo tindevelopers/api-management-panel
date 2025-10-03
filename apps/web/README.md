@@ -193,18 +193,95 @@ src/
 
 ### Vercel (Recommended)
 
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Add your environment variables in Vercel dashboard
-4. Deploy!
+This project is part of a Turborepo monorepo. Follow these steps for deployment:
+
+#### Initial Setup
+
+1. **Push your code to GitHub**
+   ```bash
+   git push origin develop
+   ```
+
+2. **Connect to Vercel**
+   - Go to [Vercel Dashboard](https://vercel.com/dashboard)
+   - Click "Add New Project"
+   - Import your GitHub repository
+
+3. **Configure Project Settings**
+   - **Framework Preset**: Next.js
+   - **Root Directory**: `apps/web` ⚠️ **IMPORTANT**
+   - **Build Command**: Leave as default or use `next build`
+   - **Output Directory**: Leave as default (`.next`)
+   - **Install Command**: Leave as default or use `npm install`
+
+4. **Add Environment Variables**
+   Go to Settings → Environment Variables and add:
+   - `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Your Supabase anon key
+   - `SUPABASE_SERVICE_ROLE_KEY` - Your Supabase service role key
+   - `NEXT_PUBLIC_APP_URL` - Your Vercel deployment URL
+
+5. **Deploy!**
+   - Click "Deploy"
+   - Wait for the build to complete
+   - Your app will be live at `your-project.vercel.app`
+
+#### Troubleshooting
+
+**Error: "No Next.js version detected"**
+- ✅ **Solution**: Set Root Directory to `apps/web` in Vercel project settings
+- Go to: Settings → General → Root Directory → Edit → Enter `apps/web` → Save
+
+**Build fails with module not found**
+- Check that all environment variables are set correctly
+- Verify the Root Directory is set to `apps/web`
+- Try clearing the build cache in Vercel settings
+
+**For detailed troubleshooting**, see:
+- `VERCEL-QUICK-FIX.md` in the repository root
+- `VERCEL-MONOREPO-FIX.md` for comprehensive guide
+
+#### Continuous Deployment
+
+Once configured, Vercel will automatically deploy:
+- ✅ Every push to `main` branch → Production
+- ✅ Every push to `develop` branch → Preview
+- ✅ Every pull request → Preview deployment
 
 ### Other Platforms
 
-The app can be deployed to any platform that supports Next.js:
-- Netlify
-- Railway
-- DigitalOcean App Platform
-- AWS Amplify
+The app can be deployed to any platform that supports Next.js. For monorepo deployments:
+
+**Netlify**
+- Set Base Directory to `apps/web`
+- Build Command: `npm run build`
+- Publish Directory: `apps/web/.next`
+
+**Railway**
+- Set Root Directory to `apps/web`
+- Build Command: `npm run build`
+- Start Command: `npm start`
+
+**DigitalOcean App Platform**
+- Set Source Directory to `apps/web`
+- Build Command: `npm run build`
+- Run Command: `npm start`
+
+**AWS Amplify**
+- Set App Root to `apps/web`
+- Build settings: Use Next.js preset
+
+**Docker**
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY apps/web ./apps/web
+WORKDIR /app/apps/web
+RUN npm run build
+CMD ["npm", "start"]
+```
 
 ## Contributing
 
