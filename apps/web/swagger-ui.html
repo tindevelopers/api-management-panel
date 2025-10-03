@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Writer SDK API - Swagger UI</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" />
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+        body {
+            margin:0;
+            background: #fafafa;
+        }
+        .auth-container {
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .auth-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .auth-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .auth-status.authenticated {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .auth-status.not-authenticated {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .auth-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .auth-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .auth-button.primary {
+            background: #007bff;
+            color: white;
+        }
+        .auth-button.primary:hover {
+            background: #0056b3;
+        }
+        .auth-button.secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .auth-button.secondary:hover {
+            background: #545b62;
+        }
+        .token-display {
+            font-family: monospace;
+            font-size: 12px;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            word-break: break-all;
+            max-width: 600px;
+        }
+        .instructions {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        .instructions h4 {
+            margin: 0 0 10px 0;
+            color: #0066cc;
+        }
+        .instructions ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        .copy-button {
+            margin-left: 10px;
+            padding: 4px 8px;
+            font-size: 12px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .copy-button:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-info">
+            <span class="auth-status not-authenticated" id="authStatus">Not Authenticated</span>
+            <strong>Blog Writer SDK API Documentation</strong>
+        </div>
+        <div class="auth-actions">
+            <button class="auth-button primary" onclick="authenticate()">Authenticate with Google Cloud</button>
+            <button class="auth-button secondary" onclick="loadSwaggerUI()">Load Documentation</button>
+        </div>
+        <div id="tokenDisplay" style="display: none;">
+            <p><strong>Access Token:</strong></p>
+            <div class="token-display" id="tokenValue"></div>
+            <button class="copy-button" onclick="copyToken()">Copy Token</button>
+        </div>
+        <div class="instructions">
+            <h4>🔐 How to Access the API Documentation:</h4>
+            <ol>
+                <li><strong>Authenticate:</strong> Click "Authenticate with Google Cloud" to get your access token</li>
+                <li><strong>Load Docs:</strong> Click "Load Documentation" to open the Swagger UI with authentication</li>
+                <li><strong>Use API:</strong> All API calls will automatically include your authentication token</li>
+                <li><strong>Alternative:</strong> You can also use the token directly in curl commands or API clients</li>
+            </ol>
+        </div>
+    </div>
+
+    <div id="swagger-ui"></div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"></script>
+    <script>
+        let accessToken = null;
+        const API_BASE_URL = 'https://api-ai-blog-writer-613248238610.us-east1.run.app';
+        
+        function authenticate() {
+            // In a real implementation, you would call the Google Cloud CLI
+            // For now, we'll show how to get the token manually
+            const tokenPrompt = `
+To get your access token, run this command in your terminal:
+
+gcloud auth print-access-token
+
+Then paste the token below:
+            `;
+            
+            const token = prompt(tokenPrompt);
+            if (token && token.trim()) {
+                accessToken = token.trim();
+                document.getElementById('authStatus').textContent = 'Authenticated';
+                document.getElementById('authStatus').className = 'auth-status authenticated';
+                document.getElementById('tokenDisplay').style.display = 'block';
+                document.getElementById('tokenValue').textContent = accessToken;
+            }
+        }
+        
+        function copyToken() {
+            navigator.clipboard.writeText(accessToken).then(() => {
+                alert('Token copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy token: ', err);
+            });
+        }
+        
+        function loadSwaggerUI() {
+            if (!accessToken) {
+                alert('Please authenticate first by clicking "Authenticate with Google Cloud"');
+                return;
+            }
+            
+            // Hide the auth container
+            document.querySelector('.auth-container').style.display = 'none';
+            
+            // Initialize Swagger UI
+            const ui = SwaggerUIBundle({
+                url: `${API_BASE_URL}/openapi.json`,
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                requestInterceptor: function(request) {
+                    // Add authorization header to all requests
+                    request.headers['Authorization'] = `Bearer ${accessToken}`;
+                    return request;
+                },
+                responseInterceptor: function(response) {
+                    // Handle responses
+                    return response;
+                },
+                onComplete: function() {
+                    console.log('Swagger UI loaded successfully');
+                },
+                onFailure: function(error) {
+                    console.error('Failed to load Swagger UI:', error);
+                    alert('Failed to load API documentation. Please check your authentication token.');
+                }
+            });
+        }
+        
+        // Auto-load if token is available in URL
+        window.addEventListener('load', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            if (token) {
+                accessToken = token;
+                document.getElementById('authStatus').textContent = 'Authenticated';
+                document.getElementById('authStatus').className = 'auth-status authenticated';
+                document.getElementById('tokenDisplay').style.display = 'block';
+                document.getElementById('tokenValue').textContent = accessToken;
+                loadSwaggerUI();
+            }
+        });
+    </script>
+</body>
+</html>
