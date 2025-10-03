@@ -16,7 +16,10 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  DocumentTextIcon,
+  KeyIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline'
 
 interface MenuItem {
@@ -144,6 +147,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       return (
         <div key={item.title} className="mb-1">
           <button
+            type="button"
             onClick={() => toggleExpanded(item.title)}
             className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
               itemIsActive
@@ -221,8 +225,10 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           </div>
         )}
         <button
+          type="button"
           onClick={onToggle}
           className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <svg
             className="w-5 h-5 text-gray-500"
