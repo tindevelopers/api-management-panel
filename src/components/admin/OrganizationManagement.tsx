@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Organization, SubscriptionPlan, Permission } from '@/types/multi-role'
+import { authenticatedApiCall } from '@/lib/utils/api-client'
 import { 
   Building2, 
   Plus, 
@@ -15,6 +16,7 @@ import {
   Star
 } from 'lucide-react'
 import PermissionGuard from '@/components/auth/PermissionGuard'
+import OrganizationForm from './OrganizationForm'
 
 interface OrganizationStats {
   total_users: number
@@ -29,26 +31,35 @@ interface OrganizationWithStats extends Organization {
 
 interface OrganizationManagementProps {
   className?: string
+  initialOrganizations?: Organization[]
 }
 
-export default function OrganizationManagement({ className = '' }: OrganizationManagementProps) {
-  const [organizations, setOrganizations] = useState<OrganizationWithStats[]>([])
-  const [loading, setLoading] = useState(true)
+export default function OrganizationManagement({ className = '', initialOrganizations = [] }: OrganizationManagementProps) {
+  const [organizations, setOrganizations] = useState<OrganizationWithStats[]>(initialOrganizations.map(org => ({
+    ...org,
+    stats: {
+      total_users: 0,
+      active_apis: 0,
+      storage_used: 0,
+      last_activity: new Date().toISOString()
+    }
+  })))
+  const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterPlan, setFilterPlan] = useState<SubscriptionPlan | 'all'>('all')
   const [selectedOrgs, setSelectedOrgs] = useState<string[]>([])
+  const [showCreateForm, setShowCreateForm] = useState(false)
 
-  useEffect(() => {
-    fetchOrganizations()
-  }, [])
-
-  const fetchOrganizations = async () => {
+  const fetchOrganizations = useCallback(async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/admin/organizations')
       
+      const url = '/api/admin/organizations'
+      const response = await authenticatedApiCall(url)
+
       if (!response.ok) {
-        throw new Error('Failed to fetch organizations')
+        const errorText = await response.text()
+        throw new Error(`Failed to fetch organizations: ${response.status} ${response.statusText}`)
       }
 
       const data = await response.json()
@@ -58,7 +69,16 @@ export default function OrganizationManagement({ className = '' }: OrganizationM
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    // If no initial data provided, fetch from API
+    if (!initialOrganizations || initialOrganizations.length === 0) {
+      fetchOrganizations().catch(() => setLoading(false))
+    } else {
+      setLoading(false)
+    }
+  }, [initialOrganizations?.length])
 
   const filteredOrganizations = organizations.filter(org => {
     const matchesSearch = org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -85,6 +105,25 @@ export default function OrganizationManagement({ className = '' }: OrganizationM
       }
     } catch (error) {
       console.error(`Error ${action} organization:`, error)
+    }
+  }
+
+  const handleCreateOrganization = async (data: Partial<Organization>) => {
+    try {
+      const response = await fetch('/api/admin/organizations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+
+      if (response.ok) {
+        await fetchOrganizations()
+        setShowCreateForm(false)
+      }
+    } catch (error) {
+      console.error('Error creating organization:', error)
     }
   }
 
@@ -152,7 +191,10 @@ export default function OrganizationManagement({ className = '' }: OrganizationM
             <h1 className="text-2xl font-bold text-gray-900">Organization Management</h1>
             <p className="text-gray-600">Manage organizations and their subscriptions</p>
           </div>
-          <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <button 
+            onClick={() => setShowCreateForm(true)}
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
             <Plus className="h-4 w-4 mr-2" />
             Add Organization
           </button>
@@ -383,6 +425,19 @@ export default function OrganizationManagement({ className = '' }: OrganizationM
           )}
         </div>
       </div>
+
+      {/* Create Organization Modal */}
+      {showCreateForm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <OrganizationForm
+              onSubmit={handleCreateOrganization}
+              onCancel={() => setShowCreateForm(false)}
+            />
+          </div>
+        </div>
+      )}
+
     </PermissionGuard>
   )
 }

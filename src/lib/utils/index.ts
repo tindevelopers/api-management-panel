@@ -35,3 +35,5 @@ export * from './formatting'
 
 // Logging utilities
 export * from './logging'
+
+// Note: Middleware utilities are available directly from their respective files

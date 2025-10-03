@@ -11,6 +11,7 @@ import {
   createForbiddenResponse,
   createConflictResponse,
   createValidationErrorResponse,
+  handleApiError as handleApiErrorUtil,
   extractRequestContext,
   HttpStatus,
   ErrorCodes
@@ -215,7 +216,7 @@ async function handleError(
 
   // Handle specific error types
   if (error instanceof ApiError) {
-    return await handleApiError(error, request, config, errorContext)
+    return handleApiErrorUtil(error, errorContext)
   }
 
   if (error instanceof ValidationError) {

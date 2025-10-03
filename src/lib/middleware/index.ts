@@ -13,9 +13,9 @@ export * from './error-handling'
 // =====================================================
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createCorsMiddleware } from './cors'
+import { defaultCors } from './cors'
 import { createRateLimitMiddleware } from './rate-limiting'
-import { createRequestLoggingMiddleware } from './logging'
+import { createLoggingMiddleware, loggingConfigs } from './logging'
 import { createErrorHandlingMiddleware, buildErrorHandlingConfigForEnvironment } from './error-handling'
 
 // =====================================================
@@ -78,9 +78,8 @@ export function createApiMiddlewareStack(options: {
 
   // Add CORS middleware
   if (enableCors) {
-    const corsMiddleware = createCorsMiddleware(corsOptions)
     middlewares.push(async (request, next) => {
-      const corsResult = await corsMiddleware(request)
+      const corsResult = await defaultCors(request)
       if (corsResult) return corsResult
       return await next()
     })
@@ -98,7 +97,7 @@ export function createApiMiddlewareStack(options: {
 
   // Add logging middleware
   if (enableLogging) {
-    const loggingMiddleware = createRequestLoggingMiddleware()
+    const loggingMiddleware = createLoggingMiddleware(loggingConfigs.development)
     middlewares.push(async (request, next) => {
       return await loggingMiddleware(request)
     })
@@ -148,7 +147,7 @@ export function createSecureApiMiddleware() {
     enableLogging: true,
     enableErrorHandling: true,
     corsOptions: {
-      origin: (origin: string | null) => {
+      origin: (origin: string) => {
         // Add your allowed origins here
         const allowedOrigins = ['https://yourdomain.com', 'https://app.yourdomain.com']
         return !origin || allowedOrigins.includes(origin)
@@ -426,11 +425,11 @@ export const adminApiMiddleware = createApiMiddlewareStack({
   enableLogging: true,
   enableErrorHandling: true,
   corsOptions: {
-      origin: (origin: string | null) => {
-        // Restrict to admin domains only
-        const adminOrigins = ['https://admin.yourdomain.com']
-        return !origin || adminOrigins.includes(origin)
-      },
+    origin: (origin: string) => {
+      // Restrict to admin domains only
+      const adminOrigins = ['https://admin.yourdomain.com']
+      return !origin || adminOrigins.includes(origin)
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
   },
