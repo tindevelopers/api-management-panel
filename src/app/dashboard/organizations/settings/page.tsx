@@ -252,6 +252,7 @@ export default function OrganizationSettingsPage() {
                     }
                   })}
                   className="sr-only"
+                  aria-label="Allow member invites"
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
               </label>
@@ -264,9 +265,11 @@ export default function OrganizationSettingsPage() {
                 <p className="text-sm text-gray-500">New members need approval before joining</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
+                <span id="require_approval_label" className="sr-only">Require approval for new members</span>
                 <input
                   type="checkbox"
                   id="require_approval"
+                  aria-labelledby="require_approval_label"
                   checked={formData.settings?.require_approval ?? false}
                   onChange={(e) => setFormData({
                     ...formData,
@@ -274,7 +277,7 @@ export default function OrganizationSettingsPage() {
                       ...formData.settings,
                       allow_member_invites: formData.settings?.allow_member_invites ?? true,
                       require_approval: e.target.checked,
-                      max_members: formData.settings?.max_members
+                      max_members: formData.settings?.max_members ?? 50
                     }
                   })}
                   className="sr-only"
