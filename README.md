@@ -1,219 +1,169 @@
-# 🚀 API Management Panel
+# 🚀 API Management Panel - Turborepo Monorepo
 
-A modern, secure API management panel built with Next.js 15, TypeScript, Tailwind CSS, and Supabase. Manage up to three different APIs with role-based access control, real-time updates, and a beautiful user interface.
+A modern, high-performance monorepo for the API Management Panel built with Turborepo, Next.js 15, TypeScript, Tailwind CSS, and Supabase.
 
+[![Turborepo](https://img.shields.io/badge/Turborepo-2.5-blue)](https://turbo.build/)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-Green)](https://supabase.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC)](https://tailwindcss.com/)
 
-## ✨ Features
+## 📦 What's Inside?
 
-- 🔐 **Secure Authentication** - Complete login/signup system with Supabase Auth
-- 🛡️ **Protected Routes** - Middleware-based route protection
-- 👥 **Role-Based Access** - Admin, User, and Viewer roles
-- 📊 **Database Management** - Manage up to three different APIs
-- 🎨 **Modern UI** - Beautiful, responsive design with Tailwind CSS
-- ⚡ **Real-time Ready** - Supabase real-time subscriptions
-- 🔒 **Row Level Security** - Database-level security policies
-- 📱 **Mobile Responsive** - Works perfectly on all devices
+This Turborepo includes the following packages and apps:
 
-## Features
+### Apps
 
-- ✅ **Authentication System**: Secure login/signup with Supabase Auth
-- ✅ **Protected Routes**: Middleware-based route protection
-- ✅ **Modern UI**: Clean, responsive design with Tailwind CSS
-- 🔄 **Database Management**: Ready for three database management interfaces
-- ⏳ **Real-time Updates**: Supabase real-time subscriptions (coming soon)
-- ⏳ **User Management**: Role-based access control (coming soon)
+- `web`: The main Next.js application for API management
 
-## 🎯 Live Demo
+### Packages
 
-🚀 **Live Now** - Deployed to Vercel with GitHub Actions CI/CD
+- `@repo/typescript-config`: Shared TypeScript configuration files
 
-## 🛠️ Tech Stack
-
-- **Frontend**: Next.js 14 with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Authentication**: Supabase Auth
-- **Database**: Supabase (PostgreSQL)
-- **Deployment**: Vercel (recommended)
-
-## 📸 Screenshots
-
-🚧 **Coming Soon** - Screenshots of the application
-
-## Getting Started
+## 🛠️ Setup
 
 ### Prerequisites
 
-- Node.js 18+ 
-- npm or yarn
-- Supabase account
+- Node.js >= 18.0.0
+- npm >= 9.0.0
 
-### 1. Clone and Install
+### Installation
 
 ```bash
-cd api-management-panel
+# Install dependencies
 npm install
+
+# Set up environment variables
+cp apps/web/.env.example apps/web/.env.local
+# Edit apps/web/.env.local with your Supabase credentials
 ```
 
-### 2. Supabase Setup
-
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Go to Settings > API to get your project URL and anon key
-3. Update `.env.local` with your Supabase credentials:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
-
-### 3. Database Setup
-
-Run the following SQL in your Supabase SQL editor to set up the basic schema:
-
-```sql
--- Create users table (extends auth.users)
-CREATE TABLE public.users (
-  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-  email TEXT UNIQUE NOT NULL,
-  role TEXT DEFAULT 'user' CHECK (role IN ('admin', 'user', 'viewer')),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Create sample database tables
-CREATE TABLE public.database_1 (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE TABLE public.database_2 (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE TABLE public.database_3 (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Enable Row Level Security
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.database_1 ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.database_2 ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.database_3 ENABLE ROW LEVEL SECURITY;
-
--- Create policies (adjust as needed for your use case)
-CREATE POLICY "Users can view own profile" ON public.users
-  FOR SELECT USING (auth.uid() = id);
-
-CREATE POLICY "Users can update own profile" ON public.users
-  FOR UPDATE USING (auth.uid() = id);
-
--- Insert policies for your databases (example - adjust permissions as needed)
-CREATE POLICY "Authenticated users can manage database_1" ON public.database_1
-  FOR ALL USING (auth.role() = 'authenticated');
-
-CREATE POLICY "Authenticated users can manage database_2" ON public.database_2
-  FOR ALL USING (auth.role() = 'authenticated');
-
-CREATE POLICY "Authenticated users can manage database_3" ON public.database_3
-  FOR ALL USING (auth.role() = 'authenticated');
-```
-
-### 4. Run the Development Server
+## 🚀 Development
 
 ```bash
+# Start all apps in development mode
 npm run dev
+
+# Start only the web app
+npm run dev --filter=web
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+The web app will be available at http://localhost:3000
 
-## Project Structure
+## 🏗️ Build
 
-```
-src/
-├── app/
-│   ├── (auth)/
-│   │   ├── login/          # Login page
-│   │   └── signup/         # Signup page
-│   ├── auth/
-│   │   └── callback/       # Auth callback handler
-│   ├── dashboard/          # Main dashboard
-│   ├── api/
-│   │   └── auth/           # Auth API routes
-│   └── layout.tsx          # Root layout
-├── components/
-│   ├── auth/               # Authentication components
-│   ├── dashboard/          # Dashboard components
-│   └── ui/                 # Reusable UI components
-├── lib/
-│   ├── supabase/           # Supabase client configurations
-│   └── utils.ts            # Utility functions
-├── types/
-│   └── database.ts         # Database type definitions
-└── middleware.ts           # Route protection middleware
+```bash
+# Build all apps
+npm run build
+
+# Build only the web app
+npm run build --filter=web
 ```
 
-## Next Steps
+## 🧪 Testing
 
-### Phase 2: Core Features
-- [ ] Build database management interfaces
-- [ ] Implement CRUD operations for each database
-- [ ] Add data visualization components
-- [ ] Create user management system
+```bash
+# Run all tests
+npm run test
 
-### Phase 3: Advanced Features
-- [ ] Add real-time updates with Supabase subscriptions
-- [ ] Implement role-based access control
-- [ ] Add export/import functionality
-- [ ] Performance optimization and caching
+# Run linting
+npm run lint
 
-## Environment Variables
+# Run type checking
+npm run type-check
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL | Yes |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anon key | Yes |
-| `SUPABASE_SERVICE_ROLE_KEY` | Your Supabase service role key | Yes |
-| `NEXT_PUBLIC_APP_URL` | Your app URL (for auth callbacks) | Yes |
+# Run CI tests (lint + type-check + build)
+npm run test:ci
+```
 
-## Deployment
+## 📝 Scripts
 
-### Vercel (Recommended)
+- `npm run dev` - Start all apps in development mode
+- `npm run build` - Build all apps for production
+- `npm run start` - Start all apps in production mode
+- `npm run lint` - Lint all apps
+- `npm run lint:fix` - Fix linting issues
+- `npm run type-check` - Run TypeScript type checking
+- `npm run test` - Run all tests
+- `npm run test:ci` - Run CI tests
+- `npm run clean` - Clean all build artifacts and node_modules
+- `npm run format` - Format code with Prettier
 
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Add your environment variables in Vercel dashboard
+## 🔧 Turborepo Features
+
+### Remote Caching
+
+Turborepo can use a technique known as Remote Caching to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+
+By default, Turborepo will cache locally. To enable Remote Caching you will need to authenticate with Vercel:
+
+```bash
+npx turbo login
+```
+
+Then link your Turborepo to your Remote Cache:
+
+```bash
+npx turbo link
+```
+
+### Filtering
+
+Run commands for specific apps or packages:
+
+```bash
+# Run dev only for web app
+npm run dev --filter=web
+
+# Run build for all apps except web
+npm run build --filter=!web
+```
+
+## 🚀 Deployment
+
+### Vercel Deployment
+
+This monorepo is configured for deployment on Vercel. The configuration is optimized for Turborepo:
+
+**Vercel Configuration:**
+- **Root Directory:** `apps/web`
+- **Framework:** Next.js (auto-detected)
+- **Build Command:** Auto-detected by Vercel
+- **Install Command:** Auto-detected by Vercel
+
+**Quick Deploy:**
+1. Connect your repository to Vercel
+2. Set Root Directory to `apps/web` in project settings
+3. Configure environment variables
 4. Deploy!
 
-### Other Platforms
+**Environment Variables Required:**
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `NEXT_PUBLIC_APP_URL`
 
-The app can be deployed to any platform that supports Next.js:
-- Netlify
-- Railway
-- DigitalOcean App Platform
-- AWS Amplify
+For detailed deployment instructions, see:
+- [`apps/web/README.md`](./apps/web/README.md) - Application-specific deployment guide
+- [`CONFIGURATION-COMPLETE.md`](./CONFIGURATION-COMPLETE.md) - Deployment configuration summary
+- [`VERCEL-QUICK-FIX.md`](./VERCEL-QUICK-FIX.md) - Quick deployment reference
 
-## Contributing
+### Deployment Status
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+✅ **Configured and Ready**
+- Vercel Root Directory set to `apps/web`
+- Build configuration optimized for Turborepo
+- Documentation complete
 
-## License
+## 📚 Learn More
 
-This project is licensed under the MIT License.
+- [Turborepo Documentation](https://turbo.build/repo/docs)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Supabase Documentation](https://supabase.com/docs)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read our contributing guidelines before submitting a PR.
+
+## 📄 License
+
+This project is private and proprietary.
