@@ -2,15 +2,14 @@
 
 ## ✅ **Production Deployment Complete!**
 
-Your API Management Panel is now live at:
-**🔗 https://api-management-panel-mx9z91szb-tindeveloper.vercel.app**
+Your API Management Panel is now live!
 
 ## 🔧 **GitHub Actions CI/CD Setup**
 
 To enable automated testing and deployment, you need to set up repository secrets:
 
 ### 1. Go to GitHub Repository Settings
-- Navigate to: https://github.com/tindevelopers/api-management-panel
+- Navigate to: https://github.com/YOUR_ORG/YOUR_REPO
 - Click **Settings** tab
 - Click **Secrets and variables** → **Actions**
 
@@ -18,9 +17,13 @@ To enable automated testing and deployment, you need to set up repository secret
 
 #### **Supabase Secrets:**
 ```
-NEXT_PUBLIC_SUPABASE_URL = https://kgaovsovhggehkpntbzu.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnYW92c292aGdnZWhrcG50Ynp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5NTY4NjAsImV4cCI6MjA3MzUzMjg2MH0.L_vZL15jxUcgxBoHq3bLfh-wt4ftrhwB8sR5bHmkQ9w
+NEXT_PUBLIC_SUPABASE_URL = https://YOUR_PROJECT_ID.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY = YOUR_ANON_KEY_HERE
 ```
+
+**Get your Supabase credentials from:**
+- Go to: https://supabase.com/dashboard/project/YOUR_PROJECT_ID/settings/api
+- Copy the Project URL and anon/public key
 
 #### **Vercel Secrets (Optional for GitHub Actions deployment):**
 ```
@@ -36,17 +39,17 @@ VERCEL_PROJECT_ID = (Get from Vercel CLI: vercel project ls)
 - ✅ GitHub Actions CI/CD pipeline configured
 - ✅ Vercel deployment successful
 - ✅ Environment variables configured
-- ✅ Production URL: https://api-management-panel-mx9z91szb-tindeveloper.vercel.app
+- ✅ Production URL configured
 
 ### 🔄 **Next Steps:**
 
 #### **1. Complete Database Setup:**
-1. Go to Supabase: https://supabase.com/dashboard/project/kgaovsovhggehkpntbzu
+1. Go to your Supabase dashboard
 2. Run the SQL from `supabase-schema.sql`
 3. Test the authentication system
 
 #### **2. Test Production Deployment:**
-1. Visit: https://api-management-panel-mx9z91szb-tindeveloper.vercel.app
+1. Visit your production URL
 2. Create your first account
 3. Test login/logout functionality
 

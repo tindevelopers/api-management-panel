@@ -6,22 +6,27 @@
 echo "🚀 Setting up Vercel environment variables for API Management Panel"
 echo "================================================================"
 
-# Supabase configuration
-SUPABASE_URL="https://kgaovsovhggehkpntbzu.supabase.co"
-SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnYW92c292aGdnZWhrcG50Ynp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5NTY4NjAsImV4cCI6MjA3MzUzMjg2MH0.L_vZL15jxUcgxBoHq3bLfh-wt4ftrhwB8sR5bHmkQ9w"
-APP_URL="https://api-management-panel-8dl2fq2d9-tindeveloper.vercel.app"
+# Supabase configuration - REPLACE WITH YOUR ACTUAL VALUES
+SUPABASE_URL="https://YOUR_PROJECT_ID.supabase.co"
+SUPABASE_ANON_KEY="YOUR_ANON_KEY_HERE"
+APP_URL="https://your-app.vercel.app"
+
+echo ""
+echo "⚠️  IMPORTANT: Update the variables above with your actual Supabase credentials"
+echo "   Get them from: https://supabase.com/dashboard/project/YOUR_PROJECT_ID/settings/api"
+echo ""
 
 # Function to add environment variable
 add_env_var() {
     local var_name=$1
     local var_value=$2
     local environment=$3
-    
+
     echo "📝 Adding $var_name for $environment environment..."
-    
+
     # Use printf to provide the value to vercel env add
     printf "%s" "$var_value" | vercel env add "$var_name" "$environment"
-    
+
     if [ $? -eq 0 ]; then
         echo "✅ Successfully added $var_name for $environment"
     else
@@ -49,14 +54,10 @@ echo "🎉 Environment variables setup complete!"
 echo ""
 echo "📋 Summary:"
 echo "==========="
-echo "✅ Preview Environment (develop branch): Configured"
-echo "✅ Development Environment: Configured"
-echo "✅ Production Environment: Already configured"
+echo "✅ Preview environment configured (for develop branch)"
+echo "✅ Development environment configured"
 echo ""
-echo "🚀 Next steps:"
-echo "1. The develop branch deployment should now show the login screen"
-echo "2. Visit: https://api-management-panel-8dl2fq2d9-tindeveloper.vercel.app"
-echo "3. You should see the login page instead of the setup page"
-echo ""
-echo "🔍 To verify the configuration:"
-echo "vercel env ls"
+echo "🔍 Next Steps:"
+echo "1. Verify the environment variables in Vercel Dashboard"
+echo "2. Trigger a new deployment to apply the changes"
+echo "3. Test the application on the preview URL"

@@ -32,17 +32,20 @@ The develop branch deployment was showing the setup screen instead of the login 
 
 ### **Environment Values**
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=https://kgaovsovhggehkpntbzu.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-NEXT_PUBLIC_APP_URL=https://api-management-panel-8dl2fq2d9-tindeveloper.vercel.app
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_ANON_KEY_HERE
+NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
 ```
+
+**Get your credentials from:**
+- Supabase Dashboard: https://supabase.com/dashboard/project/YOUR_PROJECT_ID/settings/api
 
 ---
 
 ## 🎯 **Expected Results**
 
 ### **✅ Develop Branch Deployment**
-- **URL**: https://api-management-panel-8dl2fq2d9-tindeveloper.vercel.app
+- **URL**: Your Vercel preview URL
 - **Expected Behavior**: Should now show the **login screen** instead of the setup screen
 - **Status**: New deployment triggered with environment variables
 
@@ -99,9 +102,9 @@ vercel env ls
 
 ### **If Environment Variables Missing**
 ```bash
-# Re-add environment variables
-echo "https://kgaovsovhggehkpntbzu.supabase.co" | vercel env add NEXT_PUBLIC_SUPABASE_URL preview
-echo "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." | vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY preview
+# Re-add environment variables (replace with your actual values)
+echo "https://YOUR_PROJECT_ID.supabase.co" | vercel env add NEXT_PUBLIC_SUPABASE_URL preview
+echo "YOUR_ANON_KEY_HERE" | vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY preview
 ```
 
 ---
@@ -134,11 +137,11 @@ git push origin develop
 
 ## 🎉 **Success Summary**
 
-✅ **Environment variables configured for all Vercel environments**  
-✅ **Develop branch deployment should now show login screen**  
-✅ **Local and Vercel environments now have parity**  
-✅ **New deployment triggered with updated configuration**  
-✅ **Ready for testing and verification**  
+✅ **Environment variables configured for all Vercel environments**
+✅ **Develop branch deployment should now show login screen**
+✅ **Local and Vercel environments now have parity**
+✅ **New deployment triggered with updated configuration**
+✅ **Ready for testing and verification**
 
 **🎯 The develop branch deployment should now work exactly like localhost!**
 
@@ -151,5 +154,9 @@ git push origin develop
 - **Solution Applied**: Configured all environments with Supabase variables
 - **Deployment Triggered**: New deployment with environment variables
 - **Expected Resolution**: Within 2-3 minutes (deployment time)
+
+---
+
+**🔒 Security Note**: All sensitive credentials have been removed from this documentation for security purposes.
 
 **🚀 The API Management Panel develop branch should now be fully functional!**
