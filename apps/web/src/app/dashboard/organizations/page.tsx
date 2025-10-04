@@ -59,17 +59,17 @@ export default function OrganizationsPage() {
   }
 
   return (
-    <div className="p-6">
-      {/* Header */}
+    <>
+      {/* Header with Create Button */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Organizations</h1>
-          <p className="text-gray-600">Manage your organizations and teams</p>
+          <h2 className="text-xl font-semibold text-gray-900">Organizations Overview</h2>
+          <p className="text-sm text-gray-600 mt-1">Manage your organizations and teams</p>
         </div>
         <button
           type="button"
           onClick={() => setShowCreateModal(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
         >
           <PlusIcon className="h-5 w-5" />
           Create Organization
@@ -80,8 +80,8 @@ export default function OrganizationsPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <BuildingOfficeIcon className="h-6 w-6 text-blue-600" />
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <BuildingOfficeIcon className="h-6 w-6 text-indigo-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Organizations</p>
@@ -89,11 +89,11 @@ export default function OrganizationsPage() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <UsersIcon className="h-6 w-6 text-green-600" />
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <UsersIcon className="h-6 w-6 text-indigo-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Members</p>
@@ -103,11 +103,11 @@ export default function OrganizationsPage() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <ChartBarIcon className="h-6 w-6 text-purple-600" />
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <ChartBarIcon className="h-6 w-6 text-indigo-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Active Organizations</p>
@@ -120,27 +120,27 @@ export default function OrganizationsPage() {
       </div>
 
       {/* Organizations Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {organizations.map((org) => (
-          <OrganizationCard
-            key={org.id}
-            organization={org}
-            onEdit={(org) => {
-              // TODO: Implement edit functionality
-              console.log('Edit organization:', org)
-            }}
-            onDelete={(org) => {
-              // TODO: Implement delete functionality
-              if (confirm(`Are you sure you want to delete "${org.name}"?`)) {
-                console.log('Delete organization:', org)
-              }
-            }}
-          />
-        ))}
-      </div>
-
-      {organizations.length === 0 && (
-        <div className="text-center py-12">
+      {organizations.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {organizations.map((org) => (
+            <OrganizationCard
+              key={org.id}
+              organization={org}
+              onEdit={(org) => {
+                // TODO: Implement edit functionality
+                console.log('Edit organization:', org)
+              }}
+              onDelete={(org) => {
+                // TODO: Implement delete functionality
+                if (confirm(`Are you sure you want to delete "${org.name}"?`)) {
+                  console.log('Delete organization:', org)
+                }
+              }}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 bg-white rounded-lg shadow">
           <BuildingOfficeIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No organizations</h3>
           <p className="mt-1 text-sm text-gray-500">Get started by creating your first organization.</p>
@@ -148,7 +148,7 @@ export default function OrganizationsPage() {
             <button
               type="button"
               onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 mx-auto transition-colors"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 mx-auto transition-colors"
             >
               <PlusIcon className="h-5 w-5" />
               Create Organization
@@ -163,6 +163,6 @@ export default function OrganizationsPage() {
         onClose={() => setShowCreateModal(false)}
         onSuccess={handleCreateSuccess}
       />
-    </div>
+    </>
   )
 }

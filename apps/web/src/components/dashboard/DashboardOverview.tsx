@@ -43,6 +43,7 @@ interface StatsCard {
 
 export default function DashboardOverview({ user }: DashboardOverviewProps) {
   const [databases, setDatabases] = useState<DatabaseInfo[]>([])
+  const [mounted, setMounted] = useState(false)
   const [apiStatus, setApiStatus] = useState<APIStatus>({
     blogWriter: {
       status: 'disconnected',
@@ -53,6 +54,7 @@ export default function DashboardOverview({ user }: DashboardOverviewProps) {
 
   // Load data on component mount
   useEffect(() => {
+    setMounted(true)
     loadDatabases()
     checkAPIStatus()
   }, [])
@@ -263,7 +265,7 @@ export default function DashboardOverview({ user }: DashboardOverviewProps) {
                   <div className="ml-3">
                     <p className="font-medium text-gray-900">Blog Writer API</p>
                     <p className="text-sm text-gray-500">
-                      Last checked: {new Date(apiStatus.blogWriter.lastCheck).toLocaleTimeString()}
+                      Last checked: {mounted ? new Date(apiStatus.blogWriter.lastCheck).toLocaleTimeString() : '--:--:--'}
                     </p>
                   </div>
                 </div>
